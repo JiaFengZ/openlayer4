@@ -16,12 +16,97 @@ openlayer 的结构就是由上面提到的几个关键概念为骨架组建的�
 	`ol.control` 管理UI控件，其下扩展有 `FullScreen`(全屏)/`MousePositio`(鼠标位置)/`OverviewMap`(鹰眼)/`Rotate`(旋转)/`Zoom`(缩放)/`ScaleLine`/`ZoomSlider`(滑动缩放)/`ZoomToExtent`(缩放控制范围)等预定义好的UI控件，方便用户对地图进行操作控制。另外 `ol.control.Control`允许自定义控件。  
 	`ol.Feature` 负责管理地图元素 `features`，`features`是指带有几何形状(`geometry`)和属性(`attribute`)的矢量数据，可以看作比 `sources` 更底层的组成元素。  
 
-除了以上几个核心的类，还有几个重要的工具类:  	
+除了以上几个核心的类，还有几个重要的工具类:   
 	`ol.style` 管理地图元素(`features`)的渲染样式    
 	`ol.coordinate` 封装了坐标相关的操作，比如说坐标变换   
 	`ol.events` 事件，`ol.events.Event`实现了各种事件接口，其下又有若干对应不同触发对象的事件类，比如`ol.MapEvent`就是负责`map`触发的事件，`ol.Map`中就有定义能够触发的事件类型。  
 
-## 1.1 map
+## 1.1 ol.Map
+`map` 是 `openlayer` 的核心，`map` 是渲染视图、图层的容器，如下构造一个 `map` 地图容器：
+```javasctipt
+var map = ol.Map({
+	view: new ol.View({
+		center: [0, 0],
+		zoom: 1
+	}),
+	layers: [{
+		new ol.layer.Tile({
+			source: new ol.source.OSM
+		})
+	}],
+	target: 'map'
+});
+```
+ol.Map 是地图 map 的构造函数，几个关键的参数值如下：   
+new ol.Map(options)  
+options.controls 初始添加到地图的UI控制组件(就是上文提及的全屏、鹰眼、缩放等控制按钮)，默认是 ol.control.defaults()  
+options.pixelRatio 设备像素比，默认是取值 window.devicePixelRatio  
+options.interactions 初始添加到地图的交互行为，默认是 ol.interation.defaults()  
+options.layers 图层  
+options.renderer 使用的渲染器，可选canvas、WebGl  
+options.target 渲染地图的目标容器，是一个元素或者元素的id  
+options.view 设置地图视图参数，使用new ol.View()构造  
+
+上面忽略了一些其他参数，可在其API文档查看完整的参数列表。
+
+### 1.1.1 map 绑定的事件
+`click` 点击事件
+`dblclick` 双击事件
+`moveend` map 开始移动时触发
+`movestart` map 移动结束后触发
+`pointerdrag` 鼠标拖拽
+`pointermove` 鼠标移动
+`postrender` 地图渲染后触发
+`propertychange` 地图某个属性变化时触发
+`singleclick` 单击，click后延迟250ms触发，确保不是双击事件
+```javascript
+map.on('click', function() {
+	
+});
+```
+### 1.1.2 map 对象的方法
+写方法：  
+addControl(new ol.control.Control(...)) 添加控件  
+removeControl()
+addInteraction(new ol.interaction.Interaction(...)) 添加交互行为   
+removeInteraction()
+addLayer(layer) 添加图层  
+removeLayer()
+addOverlay(new ol.Overlay(...)) 添加悬浮框元素  
+removeOverlay()
+dispatchEvent(event) 手动触发事件，将会调用所有监听了该类型事件的监听回调函数  
+
+读方法：  
+getControls()  
+getInteractions()  
+getLayerGroup()  
+getView()  
+getLayers()  
+getOverlayById()  
+getOverlays()  
+getCoordinateFromPixel()  
+getEventCoordinate()  
+getEventPixel()  
+getFeaturesAtPixel()  
+getPixelFromCoordinate()  
+
+getRevision()  
+getSize()  
+getTarget()  
+getTargetElement()  
+getViewport()  
+
+
+绑定事件的方法：  
+on(type, listener, opt_this) 绑定事件  
+un(type, listener, opt_this) 解绑事件
+
+其他方法：  
+forEachFeatureAtPixel(pixel, callback, opt_options) 遍历特定像素点位置的 `features` 元素并执行回调函数  
+forEachLayerAtPixel(pixel, callback) 遍历特定像素点位置的 `layers` 图层	并执行回调  
+hasFeatureAtPixel() 判断特定像素点位置是否包含 `features`  
+updateSize() 重新计算地图视口大小(viewport)  
+
 ## 1.2 layer
 ## 1.3 source
 ## 1.4 feature
