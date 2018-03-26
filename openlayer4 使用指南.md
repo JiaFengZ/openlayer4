@@ -50,62 +50,58 @@ options.view 设置地图视图参数，使用new ol.View()构造
 上面忽略了一些其他参数，可在其API文档查看完整的参数列表。
 
 ### 1.1.1 map 绑定的事件
-`click` 点击事件
-`dblclick` 双击事件
-`moveend` map 开始移动时触发
-`movestart` map 移动结束后触发
-`pointerdrag` 鼠标拖拽
-`pointermove` 鼠标移动
-`postrender` 地图渲染后触发
-`propertychange` 地图某个属性变化时触发
+`click` 点击事件  
+`dblclick` 双击事件  
+`moveend` map 开始移动时触发  
+`movestart` map 移动结束后触发  
+`pointerdrag` 鼠标拖拽  
+`pointermove` 鼠标移动  
+`postrender` 地图渲染后触发  
+`propertychange` 地图某个属性变化时触发  
 `singleclick` 单击，click后延迟250ms触发，确保不是双击事件
-```javascript
-map.on('click', function() {
-	
-});
-```
+
 ### 1.1.2 map 对象的方法
 写方法：  
-addControl(new ol.control.Control(...)) 添加控件  
-removeControl()
-addInteraction(new ol.interaction.Interaction(...)) 添加交互行为   
-removeInteraction()
-addLayer(layer) 添加图层  
-removeLayer()
-addOverlay(new ol.Overlay(...)) 添加悬浮框元素  
-removeOverlay()
-dispatchEvent(event) 手动触发事件，将会调用所有监听了该类型事件的监听回调函数  
+* addControl(new ol.control.Control(...)) 添加控件  
+* removeControl() 移除控件  
+* addInteraction(new ol.interaction.Interaction(...)) 添加交互行为   
+* removeInteraction() 移除交互行为  
+* addLayer(layer) 添加图层  
+* removeLayer() 移除图层  
+* addOverlay(new ol.Overlay(...)) 添加悬浮元素  
+* removeOverlay() 移除悬浮元素  
+* dispatchEvent(event) 手动触发事件，将会调用所有监听了该类型事件的监听回调函数  
 
 读方法：  
-getControls()  
-getInteractions()  
-getLayerGroup()  
-getView()  
-getLayers()  
-getOverlayById()  
-getOverlays()  
-getCoordinateFromPixel()  
-getEventCoordinate()  
-getEventPixel()  
-getFeaturesAtPixel()  
-getPixelFromCoordinate()  
+* getControls()  
+* getInteractions()  
+* getLayerGroup()  
+* getView()  
+* getLayers()  
+* getOverlayById()  
+* getOverlays()  
+* getCoordinateFromPixel()  
+* getEventCoordinate()  
+* getEventPixel()  
+* getFeaturesAtPixel()  
+* getPixelFromCoordinate()  
 
-getRevision()  
-getSize()  
-getTarget()  
-getTargetElement()  
-getViewport()  
+* getRevision()  
+* getSize()  
+* getTarget()  
+* getTargetElement()  
+* getViewport()  
 
 
 绑定事件的方法：  
-on(type, listener, opt_this) 绑定事件  
-un(type, listener, opt_this) 解绑事件
+* on(type, listener, opt_this) 绑定事件  
+* un(type, listener, opt_this) 解绑事件
 
 其他方法：  
-forEachFeatureAtPixel(pixel, callback, opt_options) 遍历特定像素点位置的 `features` 元素并执行回调函数  
-forEachLayerAtPixel(pixel, callback) 遍历特定像素点位置的 `layers` 图层	并执行回调  
-hasFeatureAtPixel() 判断特定像素点位置是否包含 `features`  
-updateSize() 重新计算地图视口大小(viewport)  
+* forEachFeatureAtPixel(pixel, callback, opt_options) 遍历特定像素点位置的 `features` 元素并执行回调函数  
+* forEachLayerAtPixel(pixel, callback) 遍历特定像素点位置的 `layers` 图层并执行回调  
+* hasFeatureAtPixel() 判断特定像素点位置是否包含 `features`  
+* updateSize() 重新计算地图视口大小(viewport)  
 
 ## 1.2 layer
 ## 1.3 source

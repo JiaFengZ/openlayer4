@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ol.Map操作示例</title>
+    <link rel="stylesheet" href="https://openlayers.org/en/v4.6.5/css/ol.css" type="text/css">
+    <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
+    <script src="https://openlayers.org/en/v4.6.5/build/ol.js"></script>
+    <script src="map.js"></script>
+    <style>    
+      #map:focus {
+        outline: #4A74A8 solid 0.15em;
+      }
+      #map {
+      	width: calc(100% - 200px);
+      	float: right;
+      }
+      #control {
+      	width: 200px;
+      	float: left;
+      }
+      button {
+      	border: solid 1px #eee;
+	    background: #ddd;
+	    border-radius: 2px;
+	    padding: 5px;
+	    cursor: pointer;
+      }
+      button:hover {
+      	color: #fff;
+	    background: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map" class="map" tabindex="0"></div>
+    <div id="control">
+    	<button onclick="zoomout()">缩小</button><br/>
+    	<button onclick="zoomin()">放大</button><br/>
+    	<button onclick="rotate()">旋转</button><br/>
+    	<button id="btn1" onclick="addOverviewUi()">添加鹰眼控件</button><br/>
+    	<button id="btn2" onclick="addFullScreenUi()">添加全屏控件</button><br/>
+    	<button onclick="addCustomUi()">添加自定义控件</button>
+    	<button id="btn3" onclick="bindClickEvent()">绑定单击事件</button><br/>
+    	<button id="btn4" onclick="bindDblClickEvent()">绑定双击事件</button>
+
+    </div>
+
+    <script>
+      var map = new ol.Map({
+        layers: [
+          new ol.layer.Tile({
+            source: new ol.source.OSM()
+          })
+        ],
+        target: 'map',
+        controls: ol.control.defaults({
+          attributionOptions: {
+            collapsible: false
+          }
+        }),
+        view: new ol.View({
+          center: [0, 0],
+          zoom: 2
+        })
+      });
+      var hasOverviewUi = false;
+      var hasFullScreenUi = false;
+      var isBindClick = false;
+      var isBindDblclick = false;
+      var OverviewUi = new ol.control.OverviewMap();
+      var FullScreenUi = new ol.control.FullScreen();
+
+      function zoomout() {
+      	var view = map.getView();
+        var zoom = view.getZoom();
+        view.setZoom(zoom - 1);
+      }
+
+      function zoomin() {
+      	var view = map.getView();
+        var zoom = view.getZoom();
+        view.setZoom(zoom + 1);
+      }
+
+      function rotate() {
+      	var view = map.getView();
+        var rotation = view.getRotation();
+        view.setRotation(rotation + 10);
+      }
+
+      function addOverviewUi() {
+      	if (!hasOverviewUi) {      		
+      		map.addControl(OverviewUi);
+      		document.getElementById('btn1').innerHTML = '移除鹰眼控件';
+      	}
+      	else {
+      		map.removeControl(OverviewUi);
+      		document.getElementById('btn1').innerHTML = '添加鹰眼控件';
+      	}
+      	hasOverviewUi = !hasOverviewUi;
+      	
+      }
+      function addFullScreenUi() {
+      	if (!hasFullScreenUi) {
+      		map.addControl(FullScreenUi);
+      		document.getElementById('btn2').innerHTML = '移除全屏控件';
+      	}
+      	else {
+      		map.removeControl(FullScreenUi);
+      		document.getElementById('btn2').innerHTML = '添加全屏控件';
+      	}
+      	hasFullScreenUi = !hasFullScreenUi;
+      }
+
+      var hasCustomUi = false;
+      function addCustomUi() {
+      	if (hasCustomUi) return;
+      	var ele = document.createElement('button');
+      	ele.innerHTML = '旋转地图';
+      	ele.addEventListener('click', function() {
+      		var view = map.getView();
+	        var rotation = view.getRotation();
+	        view.setRotation(rotation + 10);
+      	});
+      	var control = new ol.control.Control({
+      		element: ele,
+      		render: function() {
+
+      		}
+      	});
+      	map.addControl(control);
+      	hasCustomUi = true;
+      }
+
+      function clickEvent(event) {      	
+      	alert('绑定了单击事件！单击坐标为' + event.coordinate);
+      }
+      function bindClickEvent() {
+      	if (!isBindClick) {
+      		map.on('click', clickEvent);
+      		document.getElementById('btn3').innerHTML = '解绑单击事件';
+      	} else {
+      		map.un('click', clickEvent);
+      		document.getElementById('btn3').innerHTML = '绑定单击事件';
+      	}
+      	isBindClick = !isBindClick;
+      }
+
+      function dblclickEvent(event) {
+      	alert('绑定了双击事件！双击位置为' + event.pixel);      	
+      }
+      function bindDblClickEvent() {
+      	if (!isBindDblclick) {
+      		map.on('dblclick', dblclickEvent);
+      		document.getElementById('btn4').innerHTML = '解绑双击事件';
+      	} else {
+      		map.un('dblclick', dblclickEvent);
+      		document.getElementById('btn4').innerHTML = '绑定双击事件';
+      	}
+      	isBindDblclick = !isBindDblclick;
+      }
+      
+    </script>
+  </body>
+</html>
