@@ -104,6 +104,17 @@ options.view 设置地图视图参数，使用new ol.View()构造
 * updateSize() 重新计算地图视口大小(viewport)  
 
 ## 1.2 layer
+`ol.layer.Layer`可以创建图层，其下的子类 `ol.layer.Image` `ol.layer.Tile` `ol.layer.Vector`可创建不同格式数据源的图层。
+```javascript
+var staticImageLayer = new ol.layer.Image({
+    source: new ol.source.ImageStatic({
+      attributions: '© <a href="http://xkcd.com/license.html">xkcd</a>',
+      url: 'https://imgs.xkcd.com/comics/online_communities.png',
+      projection: projection,
+      imageExtent: extent
+    })
+})
+```
 ## 1.3 source
 ## 1.4 feature
 # 2 layer 图层的相关操作
