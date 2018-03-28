@@ -104,17 +104,86 @@ options.view 设置地图视图参数，使用new ol.View()构造
 * updateSize() 重新计算地图视口大小(viewport)  
 
 ## 1.2 layer
-`ol.layer.Layer`可以创建图层，其下的子类 `ol.layer.Image` `ol.layer.Tile` `ol.layer.Vector`可创建不同格式数据源的图层。
+`ol.layer.Layer`可以创建图层，其下的子类 `ol.layer.Image` `ol.layer.Tile` `ol.layer.Vector`可创建不同格式数据源的图层。  
+首先看看 `ol.layer.Layer` 的构造方法：
+`new ol.layer.Layer(options)`:
+options.opacity 设置图层透明度，默认是1不透明  
+options.visible 设置图层的可见性  
+options.extent 显示的图层的边界范围  
+options.zIndex 图层的层级，有多个图层叠加时，通过zIndex管理  
+options.minResolution 图层最小分辨率  
+options.maxResolution 图层最大分辨率  
+
+### 1.2.1 `layer` 对象具有的方法
+读方法：  
+* getExtent() 获取图层边界范围
+* getMaxResolution() 
+* getMinResolution()
+* getOpacity() 获取图层透明度
+* getSource() 获取图层 source 数据源
+* getZIndex() 获取图层层级
+
+写方法：  
+* setExtent() 设置图层边界显示范围
+* setMap() 设置图层附属的map对象
+* setMaxResolution()
+* setMinResolution()
+* setSource() 设置图层的数据源source
+* setOpacity() 设置透明度
+* setVisible() 设置可见性
+* setZIndex() 设置层级
+### 1.2.2 事件
+* once(type, listener, opt_this) 绑定一次性事件
+* on(type, listener, opt_this) 绑定事件
+* un(type, listener, opt_this) 解绑事件
+
+### 1.2.4 一个创建矢量数据图层(Vector Layer)的例子
 ```javascript
-var staticImageLayer = new ol.layer.Image({
-    source: new ol.source.ImageStatic({
-      attributions: '© <a href="http://xkcd.com/license.html">xkcd</a>',
-      url: 'https://imgs.xkcd.com/comics/online_communities.png',
-      projection: projection,
-      imageExtent: extent
+//创建一个Vector Layer,使用 ol.source.Vector类型的数据源构造图层
+var vectorLayer = new ol.layer.Vector({
+    source: new ol.source.Vector({
+      url: 'https://openlayers.org/en/v4.6.5/examples/data/geojson/countries.geojson',
+      format: new ol.format.GeoJSON()
+    }),
+    style: function(feature) {  //使用回调函数构造返回style
+      var style = new ol.style.Style({
+        fill: new ol.style.Fill({
+          color: 'rgba(255, 255, 255, 0.6)'
+        }),
+        stroke: new ol.style.Stroke({
+          color: '#319FD3',
+          width: 1
+        }),
+        text: new ol.style.Text({
+          font: '12px Calibri,sans-serif',
+          fill: new ol.style.Fill({
+            color: '#000'
+          }),
+          stroke: new ol.style.Stroke({
+            color: '#fff',
+            width: 3
+          })
+        })
+      });
+      style.getText().setText(feature.get('name')); //从source数据源中的feature(json数据)中读取name属性
+      return style;
+    }
+  });
+
+  //使用构造的vectoreLayer图层创建一个地图
+  var map = new ol.Map({
+    layers: [vectorLayer],
+    target: 'map',
+    view: new ol.View({
+      center: [0, 0],
+      zoom: 1
     })
-})
+  });
+
 ```
+可以看到这个 vector 图层的数据源是通过 `https://openlayers.org/en/v4.6.5/examples/data/geojson/countries.geojson`获取的，实际上请求得到的是json数据，在控制台抓包其响应数据如图：  
+![json数据](/images/vector-json.png)
+
 ## 1.3 source
 ## 1.4 feature
 # 2 layer 图层的相关操作
