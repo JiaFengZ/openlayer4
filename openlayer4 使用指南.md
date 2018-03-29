@@ -103,7 +103,7 @@ options.view 设置地图视图参数，使用new ol.View()构造
 * hasFeatureAtPixel() 判断特定像素点位置是否包含 `features`  
 * updateSize() 重新计算地图视口大小(viewport)  
 
-## 1.2 layer
+## 1.2 layer([demo](https://jiafengz.github.io/openlayer4/demo/olLayer/map.html))
 `ol.layer.Layer`可以创建图层，其下的子类 `ol.layer.Image` `ol.layer.Tile` `ol.layer.Vector`可创建不同格式数据源的图层。  
 首先看看 `ol.layer.Layer` 的构造方法：
 `new ol.layer.Layer(options)`:
