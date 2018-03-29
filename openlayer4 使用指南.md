@@ -137,7 +137,7 @@ options.maxResolution 图层最大分辨率
 * on(type, listener, opt_this) 绑定事件
 * un(type, listener, opt_this) 解绑事件
 
-### 1.2.4 一个创建矢量数据图层(Vector Layer)的例子
+### 1.2.3 一个创建矢量数据图层(Vector Layer)的例子
 ```javascript
 //创建一个Vector Layer,使用 ol.source.Vector类型的数据源构造图层
 var vectorLayer = new ol.layer.Vector({
@@ -169,6 +169,59 @@ var vectorLayer = new ol.layer.Vector({
       return style;
     }
   });
+```
+可以看到这个 vector 图层的数据源是通过 `https://openlayers.org/en/v4.6.5/examples/data/geojson/countries.geojson`获取的，实际上请求得到的是json数据，在控制台抓包其响应数据如图：  
+![json数据](/images/vector-json.png)
+
+  ### 1.2.4 管理图层的属性
+  openlayer 提供了API获取和设置图层的显示范围、可见性、透明度、叠加层级等属性。
+  ```javascript
+  //创建图层
+  function createLayer(color, coordinate) {
+	//创建一个 feature 地图点元素
+	var feature = new ol.Feature(new ol.geom.Point(coordinate));
+	//设置feature的样式，绘制成一个矩形
+	feature.setStyle(new ol.style.Style({
+        image: new ol.style.RegularShape({
+            fill: new ol.style.Fill({color: color}),
+            stroke: new ol.style.Stroke({color: 'black', width: 1}),
+            points: 3,
+            radius: 80,
+            rotation: Math.PI / 4,
+            angle: 0
+        })
+    }));
+    //使用feature构造地图数据源
+  	var source = new ol.source.Vector({
+  		features: [feature]
+  	});
+	//利用source构造layer
+  	var vectorLayer = new ol.layer.Vector({
+      source: source
+    });
+    return vectorLayer;
+  }
+
+	var layers = [];
+	layers.push(createLayer('red', [40, 40])); //添加两个图层
+	layers.push(createLayer('blue', [0, 40]));
+  	var map = new ol.Map({
+	  	layers: layers,
+	    target: 'map',
+	    view: new ol.View({
+	      center: [0, 0],
+	      zoom: 18
+	    })
+  })
+	
+  function getProperties(layer) {
+	console.log(layer.getExtent());
+	console.log(layer.getVisible());
+	console.log(layer.getZIndex());
+	console.log(layer.getOpacity());
+  }
+
+  
 
   //使用构造的vectoreLayer图层创建一个地图
   var map = new ol.Map({
@@ -180,9 +233,14 @@ var vectorLayer = new ol.layer.Vector({
     })
   });
 
+  layers[0].setVisible(false);
+  layers[1].setOpacity(0.5);
+  layers[1].setZIndex(2);
+  layers[1].setExtent([10, 10]);
+  getProperties(layers[0]);
+  getProperties(layers[1]);
+
 ```
-可以看到这个 vector 图层的数据源是通过 `https://openlayers.org/en/v4.6.5/examples/data/geojson/countries.geojson`获取的，实际上请求得到的是json数据，在控制台抓包其响应数据如图：  
-![json数据](/images/vector-json.png)
 
 ## 1.3 source
 ## 1.4 feature
