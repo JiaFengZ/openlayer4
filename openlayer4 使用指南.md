@@ -247,15 +247,15 @@ var vectorLayer = new ol.layer.Vector({
 在深入 `source`的API使用前，有必要先分析一下不同的数据源格式，简单来说可以分为 `Image` `Vector` `Tile`三大类型的数据源，`Image`和`Tile`本质上都是图片或者图片集，`Vector`则是矢量数据源，其分别对应 GIS 的两种数据存储模型：矢量数据模型和栅格数据模型，矢量数据模型以离散的点坐标表示地理元素，通过点、线、面几何元素表达地图的空间元素，数据存储以对象作为单位，一般行政边界、街道会采用矢量数据存储模型。而栅格数据模型则是以一系列基于网格的不同颜色和灰度的像素元来表示空间元素，适用于连续空间变化的空间数据，比如遥感地图。对应于web端的二维地图就是矢量地图和瓦片地图两种形式，矢量地图就是采用矢量数据模型存储的矢量数据组织的地图，服务端返回的是点、线、面等离散的数据对象，瓦片地图则是根据缩放层级和显示范围计算获取相应图片，在web端拼接成一张完整的地图。回到`openlayer`的`Image` `Tile` `Vector` 三大类型数据源，`Image`和`Tile`返回的就是图片集，`Vector`返回的是离散的数据对象。  
 在 `openlayer` 中这三者有可向下扩展细分若干子类：  
 ```
-`ol.source.Source`──├── `ol.source.Image`──────├── `ol.source.ImageArcGISRest`
-					├  				           ├── `ol.source.ImageCanvas`
-					├── `ol.source.VectorTile` ├── `ol.source.ImageStatic`
-					├── `ol.source.TileJSON`   ├── `ol.source.ImageWMS`
-					├── `ol.source.TileWMS`    ├── `ol.source.Raster`
-					├── `ol.source.TileImage`
-					├── `ol.source.Tile`───────├── `ol.source.TileDebug`
-					├ 				           ├── `ol.source.TileUTFGrid`
-					└──	`ol.source.Vector`	   ├── `ol.source.UrlTile`
+ol.source.Source ──├── ol.source.Image ──────├── ol.source.ImageArcGISRest
+		   ├  			     |── ol.source.ImageCanvas
+		   ├── ol.source.VectorTile  ├── ol.source.ImageStatic
+		   ├── ol.source.TileJSON    ├── ol.source.ImageWMS
+		   ├── ol.source.TileWMS     ├── ol.source.Raster
+		   ├── ol.source.TileImage
+		   ├── ol.source.Tile ───────├── ol.source.TileDebug
+		   ├ 			     ├── ol.source.TileUTFGrid
+		   └── ol.source.Vector`     ├── ol.source.UrlTile
 
 											
 ```
