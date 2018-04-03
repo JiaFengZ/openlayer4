@@ -264,11 +264,67 @@ ol.source.Source ──├── ol.source.Image ──────├── ol.
 
 ## 4.2 `ol.source.Source`基类上几个方法
 * getProjection() 获取投影坐标系
-* getState() 获取source加载状态:`undefined`, `loading`, `ready` `error`
+* getState() 获取source加载状态:`undefined`, `loading`, `ready` ,`error`
 * get(key) 获取属性值
 * refresh() 刷新图层source，会触发 `change` 事件
 
 ## 4.3 `ol.source.Vector` 类型的数据加载
+`new ol.source.Vector(options)`  
+options.attributes ol.Attribute类型的数据，可以是string/string数组  
+options.features 组成source的数据对象  
+options.format 当feature通过url加载获取时，需设置format对解析数据  
+options.loader 加载feature的加载器，如果没有设置loader但设置了url，则使用 XHR feature 加载器    
+options.url 使用 XHR feature loader(`ol.featureloader.xhr`)加载features
+上面仅仅列举了关键的几个option，完整的配置请看官网API。 
+对于format加载器，不同格式的数据需要相应的解析器，例如对于`GeoJSON`类型的数据加载如下：
+```javascript
+var vectorSource = new ol.source.Vector({
+  format: new ol.format.GeoJSON(),
+  loader: function(extent, resolution, projection) {
+     var proj = projection.getCode();
+     var url = 'https://ahocevar.com/geoserver/wfs?service=WFS&' +
+         'version=1.1.0&request=GetFeature&typename=osm:water_areas&' +
+         'outputFormat=application/json&srsname=' + proj + '&' +
+         'bbox=' + extent.join(',') + ',' + proj;
+     var xhr = new XMLHttpRequest();
+     xhr.open('GET', url);
+     var onError = function() {
+       vectorSource.removeLoadedExtent(extent);
+     }
+     xhr.onerror = onError;
+     xhr.onload = function() {
+       if (xhr.status == 200) {
+         vectorSource.addFeatures(
+             vectorSource.getFormat().readFeatures(xhr.responseText));
+       } else {
+         onError();
+       }
+     }
+     xhr.send();
+   },
+   strategy: ol.loadingstrategy.bbox
+ });
+```
+
+## 4.4 专属`ol.source.Vector`的方法和事件
+source上的属性发生变化触发的事件：
+* addFeature() 当source添加feature时触发
+* changeFeature() 当source中的feature更新时触发
+* clear() 在source上调用clear方法时触发
+* removeFeature() 从source中移除feature时触发
+
+其他扩展的专属方法：
+* getExtent() 获取显示的边界范围
+* getFeatureById() 通过id获取feature
+* getFeatures() 获取features
+* getFeatureAtCoordinate() 获取那些几何元素(geometry)包含特性坐标点的所有features
+* getFeaturesInExtent() 获取一定范围的features
+* getClosestFeatureToCoordinate() 获取距离坐标最近的feature
+* getLoader()
+* setLoader()
+* removeFeature()
+* addFeature()
+* addFeatures()
 
 # 5 feature
 # 6 geometrory 的相关操作
