@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>ol.Map操作示例</title>
+    <title>olSource操作示例</title>
     <link rel="stylesheet" href="https://openlayers.org/en/v4.6.5/css/ol.css" type="text/css">
     <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
     <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
@@ -11,12 +11,12 @@
         outline: #4A74A8 solid 0.15em;
       }
       #map {
-        width: calc(100% - 200px);
+        width: calc(100% - 300px);
         float: right;
         background: #eee;
       }
       #control {
-        width: 200px;
+        width: 250px;
         float: left;
       }
       button {
@@ -39,52 +39,81 @@
   <body>
     <div id="map" class="map" tabindex="0"></div>
     <div id="control">
-      <fieldset>
-            <legend>图层1(红色)</legend>
-        <label>透明度：</label><input type="range" min="0" max="100" id="setOpacity"><br/>
-      <label>是否可见：</label><input type="checkbox" checked id="setVisible"><br/>
-      <label>zIndex：</label><input type="range" min="0" max="5" id="setZIndex">
+        <fieldset>
+            <legend>瓦片源(tile)</legend>
+            <label>显示：</label><input type="checkbox" checked id="setVisible"><br/>
+            
         </fieldset>
 
         <fieldset>
-            <legend>图层2(蓝色)</legend>
-        <label>透明度：</label><input type="range" min="0" max="100"id="setOpacity2"><br/>
-        <label>是否可见：</label><input type="checkbox" checked id="setVisible2"><br/>
-        <label>zIndex：</label><input type="range" min="0" max="5" id="setZIndex2">
+            <legend>矢量源(vector)</legend>
+            <label>显示：</label><input type="checkbox" checked id="setVisible1"><br/>
+            <label>添加feature</label><button id="addFeature">添加feature</button><br/>
+            <label>在地图上点击可移除feature</label><br/>
         </fieldset>
     </div>
 
     <script>
-        //创建图层
-      function createLayer(color, coordinate) {
-        //创建一个 feature 地图点元素
-        var feature = new ol.Feature(new ol.geom.Point(coordinate));
-        //设置feature的样式，绘制成一个矩形
+
+    /*var tileSource = new ol.source.WMTS({
+        url: 'http://t0.tianditu.com/img_c/wmts',
+        tileGrid: ''
+    });
+*/
+    var baseStyle = new ol.style.Style({
+        fill: new ol.style.Fill({
+          color: 'rgba(255, 255, 255, 0.6)'
+        }),
+        stroke: new ol.style.Stroke({
+          color: '#319FD3',
+          width: 1
+        }),
+        text: new ol.style.Text({
+          font: '12px Calibri,sans-serif',
+          fill: new ol.style.Fill({
+            color: '#000'
+        }),
+        stroke: new ol.style.Stroke({
+            color: '#fff',
+            width: 3
+          })
+        })
+    });
+
+    function createFeature() {
+        var feature = new ol.Feature(new ol.geom.Point([Math.random()*40, Math.random()*40]));        
         feature.setStyle(new ol.style.Style({
-            image: new ol.style.RegularShape({
-                fill: new ol.style.Fill({color: color}),
-                stroke: new ol.style.Stroke({color: 'black', width: 1}),
-                points: 3,
-                radius: 80,
-                rotation: Math.PI / 4,
-                angle: 0
+            image: new ol.style.Circle({
+                radius: 10 + Math.random() * 20,
+                fill: new ol.style.Fill({
+                    color: '#' + ('00000' + (Math.random() * 0x1000000 << 0).toString(16)).slice(-6)
+                })
             })
         }));
-        //使用feature构造地图数据源
-        var source = new ol.source.Vector({
-            features: [feature]
-        });
-        //利用source构造layer
-        var vectorLayer = new ol.layer.Vector({
-          source: source
-        });
-        return vectorLayer;
+        return feature;
     }
 
-    var layers = [];
-    layers.push(createLayer('red', [40, 40])); //添加两个图层
-    layers.push(createLayer('blue', [0, 40]));
-    //使用构造的vectoreLayer图层创建一个地图
+    var features = [];
+    var vectorSource = new ol.source.Vector({
+        source: new ol.source.Vector({
+          url: 'https://openlayers.org/en/v4.6.5/examples/data/geojson/countries.geojson',
+          format: new ol.format.GeoJSON()
+        }),
+        style: function(feature) {
+          baseStyle.getText().setText(feature.get('name'));
+          return baseStyle;
+        }
+    })
+
+    var layers = [
+        /*new ol.layer.VectorTile({
+            source: tileSource
+        }),*/
+        new ol.layer.Vector({
+            source: vectorSource
+        })
+    ];
+
     var map = new ol.Map({
         layers: layers,
         target: 'map',
@@ -93,38 +122,27 @@
           zoom: 18
         })
     })
+
+    map.on('click', function(event) {
+        var feature = vectorSource.getClosestFeatureToCoordinate(event.coordinate);
+        vectorSource.removeFeature(feature);
+    })
+
+    for (var i = 0; i < 5; i++) {
+        vectorSource.addFeature(createFeature());
+    }
         
 
-      function setZIndex(e) {
-        layers[0].setZIndex(parseInt(e.target.value))
-      }
-
-      function setVisible(e) {
-        layers[0].setVisible(e.target.checked)
-      }
-
-      function setOpacity(e) {
-        layers[0].setOpacity(parseFloat(e.target.value / 100))
-      }
-
-      function setZIndex2(e) {
-        layers[1].setZIndex(parseInt(e.target.value))
-      }
-
-      function setVisible2(e) {
-        layers[1].setVisible(e.target.checked)
-      }
-
-      function setOpacity2(e) {
-        layers[1].setOpacity(parseFloat(e.target.value / 100))
-      }
-      document.getElementById('setZIndex').addEventListener('change', setZIndex);
-      document.getElementById('setVisible').addEventListener('change', setVisible);
-      document.getElementById('setOpacity').addEventListener('change', setOpacity);
-      document.getElementById('setZIndex2').addEventListener('change', setZIndex2);
-      document.getElementById('setVisible2').addEventListener('change', setVisible2);
-      document.getElementById('setOpacity2').addEventListener('change', setOpacity2);      
-
+    document.getElementById('setVisible').addEventListener('change', function(e) {
+        layers[0].setVisible(e.target.checked);
+    });
+    document.getElementById('setVisible1').addEventListener('change', function(e) {
+        layers[1].setVisible(e.target.checked);
+    });
+    document.getElementById('addFeature').addEventListener('click', function() {
+        var feature = createFeature();
+        vectorSource.addFeature(feature);
+    });
     </script>
   </body>
 </html>
