@@ -317,7 +317,7 @@ source上的属性发生变化触发的事件：
 * getExtent() 获取显示的边界范围
 * getFeatureById() 通过id获取feature
 * getFeatures() 获取features
-* getFeatureAtCoordinate() 获取那些几何元素(geometry)包含特性坐标点的所有features
+* getFeatureAtCoordinate() 获取那些具有包含特性坐标点的几何元素(geometry)的features
 * getFeaturesInExtent() 获取一定范围的features
 * getClosestFeatureToCoordinate() 获取距离坐标最近的feature
 * getLoader()
@@ -327,6 +327,34 @@ source上的属性发生变化触发的事件：
 * addFeatures()
 
 # 5 feature
+openlayer中的`feature`可以通过`ol.Feature`类构造，`feature`用于描述地图中几何元素，是包含了要渲染的几何对象以及其他属性的json对象。  
+可以通过`setStyle`方法设置其渲染样式。
+`new ol.Feature(options)`:  
+* geometry：几何对象，`ol.gemo`下的各个子类可构造各种类型的几何对象(点、线、面)，如`ol.geom.Polygon`,`ol.geom.Point`,`ol.geom.Circle`...
+* name: 名字
+一般而言`feature`会关联使用`geometry`属性定义的几何对象进行渲染显示，但是允许定义其他的几何对象，通过`setGeometryName(name)`方法改变关联渲染的几何对象。例如：
+```javascript
+var feature = new ol.Feature({
+  geometry: new ol.geom.Polygon(polyCoords), //默认渲染这个几何对象
+  labelPoint: new ol.geom.Point(labelCoords), //定义另外一个几何对象，可调用feature.setGeometryName(labelPoint)更改渲染对象
+  name: 'My Polygon'
+});
+
+feature.setGeometryName('labelPoint'); //setGeometryName(labelPoint)更改渲染对象
+```
+## 5.1 `feature`对象的属性和方法
+* getGeometry() 获取关联渲染的几何对象
+* getGeometryName() 获取渲染的几何对象的属性名字
+* getId() 获取feature id，通过setId设置id
+* getKeys() 获取属性名字集合
+* getStyle() 获取渲染样式style
+* setGeometry() 设置几何对象
+* setGeometryName() 通过名字更改关联渲染的几何对象
+* setId() 设置id
+* setStyle() 设置渲染样式style
+
+## 5.2 `feature` `source` `layer` `map`之间的关系小结
+到这里，我们已经按照由上层到底层的顺序分析了 `map` → `layer` → `source` → `feature`(vector)，`map`有一个或者多个`layer`组成，而`source`则是构造`layer`的数据源，对于`vector`类型的`source`我们显然有更多的控制权，在页面中通过js可以对矢量图层进行一定程度上的编辑，`vector`类型的`source`是通过`feature`集合构造组成的，对矢量图层的操作归根到底是对`feature`的操作，`feature`控制着要渲染显示的点、线、面以及渲染的样式，比如说填充、描边的颜色、线型、线宽甚至文字。下一节将会介绍与`feature`关系紧密的`geometrory`几何对象。
 # 6 geometrory 的相关操作
 # 7 ol.Style 类设置元素样式
 # 8 视图 view 的相关操作
