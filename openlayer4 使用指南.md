@@ -386,14 +386,19 @@ ol.gemo.Geometry ─├── ol.geom.Geometry─├── ol.geom.GeometryColle
 ```
 结构非常清晰，`ol.geom.Geometry`是基类，几何对象上拥有的一部分方法是继承自`ol.geom.Geometry`类：
 * getClosestPoint()
-* getExtent()
-* intersectsCoordinate()
-* rotate()
-* scale()
-* transform() 
-* simplify()
+* getExtent() 获取边界范围
+* intersectsCoordinate(coordinate) 判断差传入的坐标点是否被包含
+* rotate(angle, anchor) 旋转几何对象
+* scale(sx, sy, opt_anchor) 伸缩几何对象
+* transform(source, destination) 变换坐标系
+* simplify(tolerance) 得到一个简化的几何对象
 
-## 6.2 `ol.geom.SimpleGeometry`简单几何对象
+## 6.2 `ol.geom.SimpleGeometry`简单几何对象及其操作
+我们已经知道`openlayer`提供了`Circle` `Point` `Polygon`等几种简单的几何对象，不同类型的对象分别扩展自己独有的属性和方法。下面的例子综合展示几何对象的操作：
+```javascript
+
+```
+
 ## 6.3 几何对象的绘制以及其他操作
 
 # 7 ol.Style 类设置元素样式 
