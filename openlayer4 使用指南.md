@@ -354,9 +354,49 @@ feature.setGeometryName('labelPoint'); //setGeometryName(labelPoint)更改渲染
 * setStyle() 设置渲染样式style
 
 ## 5.2 `feature` `source` `layer` `map`之间的关系小结
-到这里，我们已经按照由上层到底层的顺序分析了 `map` → `layer` → `source` → `feature`(vector)，`map`有一个或者多个`layer`组成，而`source`则是构造`layer`的数据源，对于`vector`类型的`source`我们显然有更多的控制权，在页面中通过js可以对矢量图层进行一定程度上的编辑，`vector`类型的`source`是通过`feature`集合构造组成的，对矢量图层的操作归根到底是对`feature`的操作，`feature`控制着要渲染显示的点、线、面以及渲染的样式，比如说填充、描边的颜色、线型、线宽甚至文字。下一节将会介绍与`feature`关系紧密的`geometrory`几何对象。
-# 6 geometrory 的相关操作
-# 7 ol.Style 类设置元素样式
+到这里，我们已经按照由上层到底层的顺序分析了 `map` → `layer` → `source` → `feature`(vector)，`map`有一个或者多个`layer`组成，而`source`则是构造`layer`的数据源，对于`vector`类型的`source`我们显然有更多的控制权，在页面中通过js可以对矢量图层进行一定程度上的编辑，`vector`类型的`source`是通过`feature`集合构造组成的，对矢量图层的操作归根到底是对`feature`的操作，`feature`控制着要渲染显示的点、线、面以及渲染的样式，比如说填充、描边的颜色、线型、线宽甚至文字。下一节将会介绍与`feature`关系紧密的`geometry`几何对象。
+
+# 6 `geometry` 几何对象
+上一节简单介绍了`feature`，`feature`是一个表层的概念，其关键还是`geometry`几何对象，不同的`geometry`决定了`feature`的不同表现形式。  
+`ol.geom.GeometryType`定义了`geometry`的类型：
+* `Circle` 圆
+* `Point` 点
+* `LineString` 线段
+* `LinearRing` 圆环
+* `Polygon` 多边形
+* `MultiPoint` 多个点
+* `MultiLineString`多线段 
+* `MultiPolygon` 多个多边形
+* `GeometryCollection`几何对象集合
+
+## 6.1 `ol.geom`的类结构以及基本方法
+```
+ol.gemo.Geometry ─├── ol.geom.Geometry─├── ol.geom.GeometryCollection
+                  ├                    ├── ol.geom.SimpleGeometry─├── ol.geom.Circle
+                  ├                                               ├── ol.geom.LinearRing
+                  ├                                               ├── ol.geom.LineString
+                  ├                                               ├── ol.geom.MultiLineString
+                  ├                                               ├── ol.geom.MultiPoint
+                  ├                                               ├── ol.geom.MultiPolygon
+                  ├                                               ├── ol.geom.Point
+                  ├                                               ├── ol.geom.Polygon
+                  ├
+                  ├
+                  └── ol.source.GeometryCollection
+```
+结构非常清晰，`ol.geom.Geometry`是基类，几何对象上拥有的一部分方法是继承自`ol.geom.Geometry`类：
+* getClosestPoint()
+* getExtent()
+* intersectsCoordinate()
+* rotate()
+* scale()
+* transform() 
+* simplify()
+
+## 6.2 `ol.geom.SimpleGeometry`简单几何对象
+## 6.3 几何对象的绘制以及其他操作
+
+# 7 ol.Style 类设置元素样式 
 # 8 视图 view 的相关操作
 # 9 control 控件
 # 10 事件
