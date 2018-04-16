@@ -21,14 +21,14 @@
       }
       button {
         border: solid 1px #eee;
-      background: #ddd;
-      border-radius: 2px;
-      padding: 5px;
-      cursor: pointer;
+        background: #ddd;
+        border-radius: 2px;
+        padding: 5px;
+        cursor: pointer;
       }
       button:hover {
         color: #fff;
-      background: #333;
+        background: #333;
       }
       fieldset {
         border: solid 1px #ddd;
@@ -40,6 +40,7 @@
     <div id="map" class="map" tabindex="0"></div>
     <div id="control">
         <button onclick="loadGeoJson()">加载GeoJson</button>
+        <a href="http://openlayers.org/en/latest/examples/geojson.html">该例子部分来源</a>
     </div>
 
     <script>
@@ -61,6 +62,7 @@
           center: [[5e6, 7e6]],
           radius: 1e6
         })
+       
         var point = new ol.geom.Point({
           coordinates: [0, 0]
         })
@@ -70,15 +72,15 @@
         var features = [];
         features.push(new ol.Feature({
           geometry: circle,
-          name: 'circle'
+          name: 'Mycircle'
         }))
         features.push(new ol.Feature({
           geometry: point,
-          name: 'point'
+          name: 'Mypoint'
         }))
         features.push(new ol.Feature({
           geometry: polygon,
-          name: 'polygon'
+          name: 'Mypolygon'
         }))
         var styles = {
           'Circle':  new ol.style.Style({
@@ -113,6 +115,8 @@
         var vectorSource = new ol.source.Vector({
             features: features
         });
+        vectorSource.addFeature(new ol.Feature(new ol.geom.Circle([5e6, 7e6], 1e6)));
+
         var vectorLayer = new ol.layer.Vector({
             source: vectorSource,
             style: function(feature) {
@@ -196,17 +200,87 @@
           }]
         };
 
+        var styles = {
+        'Point': new ol.style.Style({
+          image: new ol.style.Circle({
+            radius: 5,
+            fill: null,
+            stroke: new ol.style.Stroke({color: 'red', width: 1})
+          })
+        }),
+        'LineString': new ol.style.Style({
+          stroke: new ol.style.Stroke({
+            color: 'green',
+            width: 1
+          })
+        }),
+        'MultiLineString': new ol.style.Style({
+          stroke: new ol.style.Stroke({
+            color: 'green',
+            width: 1
+          })
+        }),
+        'MultiPoint': new ol.style.Style({
+          image: new ol.style.Circle({
+            radius: 5,
+            fill: null,
+            stroke: new ol.style.Stroke({color: 'red', width: 1})
+          })
+        }),
+        'MultiPolygon': new ol.style.Style({
+          stroke: new ol.style.Stroke({
+            color: 'yellow',
+            width: 1
+          }),
+          fill: new ol.style.Fill({
+            color: 'rgba(255, 255, 0, 0.1)'
+          })
+        }),
+        'Polygon': new ol.style.Style({
+          stroke: new ol.style.Stroke({
+            color: 'blue',
+            lineDash: [4],
+            width: 3
+          }),
+          fill: new ol.style.Fill({
+            color: 'rgba(0, 0, 255, 0.1)'
+          })
+        }),
+        'GeometryCollection': new ol.style.Style({
+          stroke: new ol.style.Stroke({
+            color: 'magenta',
+            width: 2
+          }),
+          fill: new ol.style.Fill({
+            color: 'magenta'
+          }),
+          image: new ol.style.Circle({
+            radius: 10,
+            fill: null,
+            stroke: new ol.style.Stroke({
+              color: 'magenta'
+            })
+          })
+        }),
+        'Circle': new ol.style.Style({
+          stroke: new ol.style.Stroke({
+            color: 'red',
+            width: 2
+          }),
+          fill: new ol.style.Fill({
+            color: 'rgba(255,0,0,0.2)'
+          })
+        })
+      };
+
         var vectorSource = new ol.source.Vector({
           features: (new ol.format.GeoJSON()).readFeatures(geojsonObject)
         });
         var vectorLayer = new ol.layer.Vector({
             source: vectorSource,
-            style: new ol.style.Style({
-                stroke: new ol.style.Stroke({
-                    color: 'red',
-                    size: 1
-                })
-            })
+            style: function(feature) {
+              return styles[feature.getGeometry().getType()];
+            }
         });
 
         map.addLayer(vectorLayer);
