@@ -73,24 +73,24 @@ options.view 设置地图视图参数，使用new ol.View()构造
 * dispatchEvent(event) 手动触发事件，将会调用所有监听了该类型事件的监听回调函数  
 
 读方法：  
-* getControls()  
-* getInteractions()  
-* getLayerGroup()  
-* getView()  
-* getLayers()  
-* getOverlayById()  
-* getOverlays()  
-* getCoordinateFromPixel()  
-* getEventCoordinate()  
-* getEventPixel()  
-* getFeaturesAtPixel()  
-* getPixelFromCoordinate()  
+* getControls()
+* getInteractions()
+* getLayerGroup()
+* getView()
+* getLayers()
+* getOverlayById()
+* getOverlays()
+* getCoordinateFromPixel()
+* getEventCoordinate()
+* getEventPixel()
+* getFeaturesAtPixel()
+* getPixelFromCoordinate()
 
-* getRevision()  
-* getSize()  
-* getTarget()  
-* getTargetElement()  
-* getViewport()  
+* getRevision()
+* getSize()
+* getTarget()
+* getTargetElement()
+* getViewport()
 
 
 绑定事件的方法：  
@@ -356,7 +356,7 @@ feature.setGeometryName('labelPoint'); //setGeometryName(labelPoint)更改渲染
 ## 5.2 `feature` `source` `layer` `map`之间的关系小结
 到这里，我们已经按照由上层到底层的顺序分析了 `map` → `layer` → `source` → `feature`(vector)，`map`有一个或者多个`layer`组成，而`source`则是构造`layer`的数据源，对于`vector`类型的`source`我们显然有更多的控制权，在页面中通过js可以对矢量图层进行一定程度上的编辑，`vector`类型的`source`是通过`feature`集合构造组成的，对矢量图层的操作归根到底是对`feature`的操作，`feature`控制着要渲染显示的点、线、面以及渲染的样式，比如说填充、描边的颜色、线型、线宽甚至文字。下一节将会介绍与`feature`关系紧密的`geometry`几何对象。
 
-# 6 `geometry` 几何对象
+# 6 `geometry` 几何对象[demo](https://jiafengz.github.io/openlayer4/demo/olGeom/map.html)
 上一节简单介绍了`feature`，`feature`是一个表层的概念，其关键还是`geometry`几何对象，不同的`geometry`决定了`feature`的不同表现形式。  
 `ol.geom.GeometryType`定义了`geometry`的类型：
 * `Circle` 圆
@@ -394,12 +394,92 @@ ol.gemo.Geometry ─├── ol.geom.Geometry─├── ol.geom.GeometryColle
 * simplify(tolerance) 得到一个简化的几何对象
 
 ## 6.2 `ol.geom.SimpleGeometry`简单几何对象及其操作
-我们已经知道`openlayer`提供了`Circle` `Point` `Polygon`等几种简单的几何对象，不同类型的对象分别扩展自己独有的属性和方法。下面的例子综合展示几何对象的操作：
+我们已经知道`openlayer`提供了`Circle` `Point` `Polygon`等几种简单的几何对象。下面的例子展示几何对象的操作：
 ```javascript
+//features of circle
 
+function genreateFeatures() {
+  var circle = new ol.geom.Circle({
+    center: [0, 0],
+    radius: 50
+  })
+  var point = new ol.geom.Point({
+    coordinates: [20, 20]
+  })
+  var coordinates = [[0, 0], [10, 10], [20, 20], [0, 0]];
+  polygon.setCoordinates([coordinates]);
+  var features = [];
+  features.push(new ol.Feature({
+    geometry: circle,
+    name: 'circle'
+  }))
+  features.push(new ol.Feature({
+    geometry: point,
+    name: 'point'
+  }))
+  features.push(new ol.Feature({
+    geometry: polygon,
+    name: 'polygon'
+  }))
+  features[0].setStyle(new ol.style.Style({
+    stroke: new ol.style.Stroke({
+      color: '#ffcc33',
+      width: 2
+    })
+  }))
+  features[1].setStyle(new ol.style.Style({
+    stroke: new ol.style.Stroke({
+      color: 'blue',
+      width: 2
+    })
+  }))
+  features[2].setStyle(new ol.style.Style({
+    stroke: new ol.style.Stroke({
+      color: 'yellow',
+      width: 2
+    })
+  }))
+  return features;
+}
+var source = new ol.source.Vector({
+  features: (genreateFeatures)()
+});
+var vectorLayer = new ol.layer.Vector({
+  source: source
+});
+
+ var map = new ol.Map({
+    layers: [vectorLayer],
+    target: 'map',
+    view: new ol.View({
+      center: [0, 0],
+      zoom: 18
+    })
+  });
 ```
 
-## 6.3 几何对象的绘制以及其他操作
+## 6.3 直接在画布上绘制`geometry`
+```javascript
+var canvas = document.getElementById('canvas');
+var vectorContext = ol.render.toContext(canvas.getContext('2d'), {size: [100, 100]});
+
+var fill = new ol.style.Fill({color: 'blue'});
+var stroke = new ol.style.Stroke({color: 'black'});
+var style = new ol.style.Style({
+  fill: fill,
+  stroke: stroke,
+  image: new ol.style.Circle({
+    radius: 10,
+    fill: fill,
+    stroke: stroke
+  })
+});
+vectorContext.setStyle(style);
+
+vectorContext.drawGeometry(new ol.geom.LineString([[10, 10], [90, 90]]));
+vectorContext.drawGeometry(new ol.geom.Polygon([[[2, 2], [98, 2], [2, 98], [2, 2]]]));
+vectorContext.drawGeometry(new ol.geom.Point([88, 88]));
+```
 
 # 7 ol.Style 类设置元素样式 
 # 8 视图 view 的相关操作
