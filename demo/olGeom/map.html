@@ -6,6 +6,7 @@
     <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
     <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
     <script src="https://openlayers.org/en/v4.6.5/build/ol.js"></script>
+    <meta charset="utf-8">
     <style>    
       #map:focus {
         outline: #4A74A8 solid 0.15em;
@@ -44,7 +45,7 @@
     </div>
 
     <script>
-      
+
       var map = new ol.Map({
         layers: [new ol.layer.Tile({
           source: new ol.source.OSM()
@@ -57,74 +58,67 @@
       });
       genreateGeoms();
 
-      function genreateGeoms() {
-        var circle = new ol.geom.Circle({
-          center: [[5e6, 7e6]],
-          radius: 1e6
-        })
-       
-        var point = new ol.geom.Point({
-          coordinates: [0, 0]
-        })
-        var polygon = new ol.geom.Polygon(null)
-        var coordinates = [[[-5e6, -1e6], [-4e6, 1e6], [-3e6, -1e6]]];
-        polygon.setCoordinates([coordinates]);
+      function genreateGeoms() {       
         var features = [];
-        features.push(new ol.Feature({
-          geometry: circle,
-          name: 'Mycircle'
-        }))
-        features.push(new ol.Feature({
-          geometry: point,
-          name: 'Mypoint'
-        }))
-        features.push(new ol.Feature({
-          geometry: polygon,
-          name: 'Mypolygon'
-        }))
-        var styles = {
-          'Circle':  new ol.style.Style({
-            stroke: new ol.style.Stroke({
-              color: '#ffcc33',
-              width: 2
-            }),
-            fill: new ol.style.Fill({
-              color: '#ffcc33'
-            })
-          }),
-          'Point': new ol.style.Style({
-            stroke: new ol.style.Stroke({
-              color: 'blue',
-              width: 2
-            }),
-            fill: new ol.style.Fill({
-              color: 'blue'
-            })
-          }),
-          'Polygon': new ol.style.Style({
-            stroke: new ol.style.Stroke({
-              color: 'yellow',
-              width: 2
-            }),
-            fill: new ol.style.Fill({
-              color: 'yellow'
-            })
-          })
-        };
-      
-        var vectorSource = new ol.source.Vector({
-            features: features
+         var pointFeature = new ol.Feature({
+            geometry: new ol.geom.Point([0, 0]),
+            name: 'Point Feature'
         });
-        vectorSource.addFeature(new ol.Feature(new ol.geom.Circle([5e6, 7e6], 1e6)));
+        var lineFeature = new ol.Feature({
+            geometry: new ol.geom.LineString([[1e7, 1e6], [1e6, 3e6]]),
+            name: 'Line Feature'
+        });
+        var polygonFeature = new ol.Feature({
+            geometry: new ol.geom.Polygon([[[1e6, -1e6], [1e6, 1e6], [3e6, 1e6], [3e6, -1e6], [1e6, -1e6]]]),
+            name: 'Polygon Feature'
+        });
+      
+       var vectorPoints = new ol.layer.Vector({
+            source: new ol.source.Vector({
+                features: [pointFeature]
+            }),
+            style: new ol.style.Style({
+              stroke: new ol.style.Stroke({
+                  color: '#ffcc33',
+                  width: 2
+                }),
+                fill: new ol.style.Fill({
+                  color: '#ffcc33'
+                })
+              })
+        });
+        var vectorLines = new ol.layer.Vector({
+            source: new ol.source.Vector({
+                features: [lineFeature]
+            }),
+            style: new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: 'red',
+                    width: 2
+                }),
+                fill: new ol.style.Fill({
+                    color: 'red'
+                })
+            })
+        });
+        var vectorPolygons = new ol.layer.Vector({
+            source: new ol.source.Vector({
+                features: [polygonFeature]
+            }),
+            style: new ol.style.Style({
+            stroke: new ol.style.Stroke({
+                color: 'yellow',
+                width: 2
+              }),
+              fill: new ol.style.Fill({
+                color: 'yellow'
+              })
+            })
+        });
 
-        var vectorLayer = new ol.layer.Vector({
-            source: vectorSource,
-            style: function(feature) {
-              console.log(feature.getGeometry().getType())
-              return styles[feature.getGeometry().getType()];
-            }
-          })
-        map.addLayer(vectorLayer);
+        map.addLayer(vectorPoints);
+        map.addLayer(vectorLines);
+        map.addLayer(vectorPolygons);
       }
 
 
