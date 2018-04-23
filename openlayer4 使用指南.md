@@ -481,7 +481,106 @@ vectorContext.drawGeometry(new ol.geom.Polygon([[[2, 2], [98, 2], [2, 98], [2, 2
 vectorContext.drawGeometry(new ol.geom.Point([88, 88]));
 ```
 
-# 7 ol.Style 类设置元素样式 
+# 7 ol.style 类设置元素样式 
+`ol.style` 用于设置 `features` 的渲染样式，如果没有显式设置`features`的样式，则会使用`layer`上设置的样式。  
+## 7.1 `ol.style`的结构
+`ol.style`的类结构如下：  
+ol.style -> ol.style.Image  -> ol.style.RegularShape -> ol.style.Circle
+                            -> ol.style.Icon
+         -> ol.style.Fill
+         -> ol.style.Stroke
+         -> ol.style.Text
+
+## 7.2 使用例子
+```javascript
+var fill = new ol.style.Fill({
+  color: 'blue'
+})
+var stroke = new ol.style.Stroke({
+  width: 2,
+  color: 'red'
+})
+var style = new ol.style.Style({
+  image: new ol.style.Circle({
+      fill: fill,
+      stroke: stroke
+    })
+})
+var vectorLayer = ol.Layer.Vector({
+  source: new ol.source.Vector({
+    url: 'https://openlayers.org/en/v4.6.5/examples/data/geojson/countries.geojson',
+    format: new ol.format.GeoJSON()
+  }),
+  style: style
+})
+
+var map = new ol.Map({
+    layers: [vectorLayer],
+    target: 'map',
+    view: new ol.View({
+      center: [0, 0],
+      zoom: 18
+    })
+})
+```
+
+## 7.3 聚合(features)样式设置
+```javascript
+ var clusterSource = new ol.source.Cluster({
+    distance: 40,
+    source: new ol.source.Vector({
+        features: (function() {  //随机生成10000个feature元素点，添加到聚合source中，多个小的feature会就近聚合成一个大的feature
+            var features = new Array(10000);
+            var e = 4500000;
+            for (var i = 0; i < 10000; ++i) {
+              var coordinates = [2 * e * Math.random() - e, 2 * e * Math.random() - e];
+              features[i] = new ol.Feature(new ol.geom.Point(coordinates));
+            }
+            return features;
+        })()
+    });
+  });
+
+var styleCache = {};
+var clusters = new ol.layer.Vector({
+  source: clusterSource,
+  style: function(feature) {  //每个feature是由多个feature聚合组成
+    var size = feature.get('features').length;
+    var style = styleCache[size];
+    if (!style) {
+      style = new ol.style.Style({
+        image: new ol.style.Circle({
+          radius: 10, //聚合半径10px
+          stroke: new ol.style.Stroke({ //描边颜色
+            color: '#fff'
+          }),
+          fill: new ol.style.Fill({ //填充背景色
+            color: '#3399CC'
+          })
+        }),
+        text: new ol.style.Text({  //聚合点数量
+          text: size.toString(),
+          fill: new ol.style.Fill({
+            color: '#fff'
+          })
+        })
+      });
+      styleCache[size] = style; //缓存复用style对象，减少对象内存空间耗用
+    }
+    return style;
+  }
+});
+
+var map = new ol.Map({
+  layers: [clusters],
+  target: 'map',
+  view: new ol.View({
+    center: [0, 0],
+    zoom: 2
+  })
+});
+```
+
 # 8 视图 view 的相关操作
 # 9 control 控件
 # 10 事件
