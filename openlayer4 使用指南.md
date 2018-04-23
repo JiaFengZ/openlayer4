@@ -485,11 +485,13 @@ vectorContext.drawGeometry(new ol.geom.Point([88, 88]));
 `ol.style` 用于设置 `features` 的渲染样式，如果没有显式设置`features`的样式，则会使用`layer`上设置的样式。  
 ## 7.1 `ol.style`的结构
 `ol.style`的类结构如下：  
-ol.style -> ol.style.Image  -> ol.style.RegularShape -> ol.style.Circle
-                            -> ol.style.Icon
-         -> ol.style.Fill
-         -> ol.style.Stroke
-         -> ol.style.Text
+```javascript
+ol.style -> ol.style.Image  -> ol.style.RegularShape -> ol.style.Circle  
+                            -> ol.style.Icon  
+         -> ol.style.Fill  
+         -> ol.style.Stroke  
+         -> ol.style.Text  
+```
 
 ## 7.2 使用例子
 ```javascript
