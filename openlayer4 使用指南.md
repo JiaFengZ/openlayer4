@@ -582,10 +582,71 @@ var map = new ol.Map({
   })
 });
 ```
+# 8 使用 ol.interation 进行交互
+## 8.1 地图默认具有的交互行为
+`ol.interation`是 openlayer 提供给用户和地图交互的操作类，使得地图可以识别响应用户特定动作，例如鼠标操作双击/单击/拖拽，键盘按键操作等。当使用 `ol.Map`创建 map 的实例时，地图会默认添加 `ol.interation.defaults`包含的操作类，使地图具有默认的交互行为：
+* ``ol.interaction.DragRotate`` 同时按下 shift 和 alt键时，按下鼠标或者拖拽可以旋转地图
+* ``ol.interaction.DoubleClickZoom`` 双击放大地图 
+* ``ol.interaction.DragPan``  拖拽移动地图
+* ``ol.interaction.PinchRotate`` 触控 双指扭转旋转地图
+* ``ol.interaction.PinchZoom`` 触控 双指收拢缩放地图
+* ``ol.interaction.KeyboardPan`` 键盘控制 导航键移动地图
+* ``ol.interaction.KeyboardZoom`` 键盘控制 + - 键缩放地图
+* ``ol.interaction.MouseWheelZoom`` 鼠标滚轮控制 缩放地图
+* ``ol.interaction.DragZoom`` 拖拽放大地图 需同时按下 shift 键
 
-# 8 视图 view 的相关操作
-# 9 control 控件
-# 10 事件
-# 11 使用 ol.interation.draw 进行绘制
+以上是地图的默认行为，可以使用`ol.interation.defaults`进行配置开启关闭特定的交互行为：
+```javascript
+var map = new ol.Map({
+        layers: layers,
+        target: 'map',
+        view: new ol.View({
+          projection: 'EPSG:4326',
+          center: [0, 0],
+          zoom: 2
+        }),
+        interation: ol.interation.defaults({
+          altShiftDragRotate: true,  //是否开启alit shift 键拖拽旋转
+          constrainResolution: false, //当缩放动作结束后是否自动缩放到整数层级
+          doubleClickZoom: true, //是否开启双击放大
+          keyboard: true, //是否开启键盘控制
+          mouseWheelZoom: true, //是否开启鼠标滚轮放大
+          shiftDragZoom: true, //是否开启shift键拖拽放大
+          dragPan: true, //是否开启拖拽移动
+          pinchRotate: true, 是否开启触控旋转
+          pinchZoom: true, //是否开启触控放大
+          zoomDelta: 1, //放大层级增量
+          zoomDuration: 100 //缩放动画过程持续时间
+        })
+      });
+```
+
+## 8.2 几个其他特殊的交互行为
+* `ol.interation.DragAndDrop` 通过拖放给source添加vector数据
+```javascript
+var interation = new ol.interation.DragAndDrop({
+  formatConstructors: function(new ol.format.Feature) {}, //格式构造函数，处理添加输入的features
+  source: ..., //feature要添加到的source容器，当feature添加到source容器时，会移除source中原有的feature如果只要添加feature，则不要使用该选项，在addFeatures事件中进行处理
+  projection: ...,
+  target: ... //拖放的目标区域，默认是视口 viewport 元素
+})
+```
+
+* `ol.interation.Select`
+首先翻译一段来自官网API文档的原话来说明`ol.interation.Select`的作用：这是为选择vector features（矢量元素）而设置的交互行为，通常而言被选择的feature具有不同的渲染样式style，因此这种选择元素的交互操作可以用来高亮特定的feature，也可以选择元素提供给其他的操作进行处理，例如修改编辑被选择的元素。有三种方式筛选要选择的元素：使用浏览器事件的 `condition`选项/ toggle add remove multi 选项/使用`filter`选项过滤函数
+
+* `ol.interation.draw` 
+这个时openlayer提供的一个很有用很强大的交互功能，允许用户实时在地图上进行绘制 feature geometry 元素集合图形。  
+`new ol.interation.draw(options)`  
+  `features`  
+  `source`  
+  `type`  
+  `finishCondition`  
+  `geometryName`
+
+# 9 视图 view 的相关操作
+# 10 control 控件
+# 11 事件
+
 # 12 overlay 的使用
 # 13 一些应用的例子
