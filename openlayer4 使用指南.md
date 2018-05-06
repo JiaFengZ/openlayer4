@@ -41,7 +41,7 @@ ol.Map 是地图 map 的构造函数，几个关键的参数值如下：
 new ol.Map(options)  
 options.controls 初始添加到地图的UI控制组件(就是上文提及的全屏、鹰眼、缩放等控制按钮)，默认是 ol.control.defaults()  
 options.pixelRatio 设备像素比，默认是取值 window.devicePixelRatio  
-options.interactions 初始添加到地图的交互行为，默认是 ol.interation.defaults()  
+options.interactions 初始添加到地图的交互行为，默认是 ol.interaction.defaults()  
 options.layers 图层  
 options.renderer 使用的渲染器，可选canvas、WebGl  
 options.target 渲染地图的目标容器，是一个元素或者元素的id  
@@ -582,9 +582,9 @@ var map = new ol.Map({
   })
 });
 ```
-# 8 使用 ol.interation 进行交互
+# 8 使用 ol.interaction 进行交互
 ## 8.1 地图默认具有的交互行为
-`ol.interation`是 openlayer 提供给用户和地图交互的操作类，使得地图可以识别响应用户特定动作，例如鼠标操作双击/单击/拖拽，键盘按键操作等。当使用 `ol.Map`创建 map 的实例时，地图会默认添加 `ol.interation.defaults`包含的操作类，使地图具有默认的交互行为：
+`ol.interaction`是 openlayer 提供给用户和地图交互的操作类，使得地图可以识别响应用户特定动作，例如鼠标操作双击/单击/拖拽，键盘按键操作等。当使用 `ol.Map`创建 map 的实例时，地图会默认添加 `ol.interaction.defaults`包含的操作类，使地图具有默认的交互行为：
 * ``ol.interaction.DragRotate`` 同时按下 shift 和 alt键时，按下鼠标或者拖拽可以旋转地图
 * ``ol.interaction.DoubleClickZoom`` 双击放大地图 
 * ``ol.interaction.DragPan``  拖拽移动地图
@@ -595,7 +595,7 @@ var map = new ol.Map({
 * ``ol.interaction.MouseWheelZoom`` 鼠标滚轮控制 缩放地图
 * ``ol.interaction.DragZoom`` 拖拽放大地图 需同时按下 shift 键
 
-以上是地图的默认行为，可以使用`ol.interation.defaults`进行配置开启关闭特定的交互行为：
+以上是地图的默认行为，可以使用`ol.interaction.defaults`配置开启关闭特定的交互行为：
 ```javascript
 var map = new ol.Map({
         layers: layers,
@@ -605,7 +605,7 @@ var map = new ol.Map({
           center: [0, 0],
           zoom: 2
         }),
-        interation: ol.interation.defaults({
+        interaction: ol.interaction.defaults({
           altShiftDragRotate: true,  //是否开启alit shift 键拖拽旋转
           constrainResolution: false, //当缩放动作结束后是否自动缩放到整数层级
           doubleClickZoom: true, //是否开启双击放大
@@ -622,27 +622,137 @@ var map = new ol.Map({
 ```
 
 ## 8.2 几个其他特殊的交互行为
-* `ol.interation.DragAndDrop` 通过拖放给source添加vector数据
+* `ol.interaction.DragAndDrop`  通过拖放给source添加vector数据，就是说可以在外部拖拽矢量数据添加到地图中动态显示
 ```javascript
-var interation = new ol.interation.DragAndDrop({
+var interaction = new ol.interaction.DragAndDrop({
   formatConstructors: function(new ol.format.Feature) {}, //格式构造函数，处理添加输入的features
-  source: ..., //feature要添加到的source容器，当feature添加到source容器时，会移除source中原有的feature如果只要添加feature，则不要使用该选项，在addFeatures事件中进行处理
+  source: ..., //feature要添加到的source容器，当feature添加到source容器时，会移除source中原有的feature，如果只要添加feature，则不要使用该选项，在addFeatures事件中进行处理
   projection: ...,
   target: ... //拖放的目标区域，默认是视口 viewport 元素
 })
 ```
 
-* `ol.interation.Select`
-首先翻译一段来自官网API文档的原话来说明`ol.interation.Select`的作用：这是为选择vector features（矢量元素）而设置的交互行为，通常而言被选择的feature具有不同的渲染样式style，因此这种选择元素的交互操作可以用来高亮特定的feature，也可以选择元素提供给其他的操作进行处理，例如修改编辑被选择的元素。有三种方式筛选要选择的元素：使用浏览器事件的 `condition`选项/ toggle add remove multi 选项/使用`filter`选项过滤函数
+* `ol.interaction.Select`   
+首先翻译一段来自官网API文档的原话来说明`ol.interaction.Select`的作用：这是为选择vector features（矢量元素）而设置的交互行为，通常而言被选择的feature具有不同的渲染样式style，因此这种选择元素的交互操作可以用来高亮特定的feature，也可以选择元素提供给其他的操作进行处理，例如修改编辑被选择的元素。有三种方式筛选要选择的元素：使用浏览器事件的 `condition`选项/ toggle add remove multi 选项/使用`filter`选项过滤函数。下面的例子（改造自[Box Selection](http://openlayers.org/en/latest/examples/box-selection.html)，我修改后的例子[olDraw](./doc/olDraw.html)）就展示使用`ol.interaction.Select`结合`ol.interaction.DragBox`选择地图元素的功能：
+```javascript
+      var map = new ol.Map({
+        layers: [
+          new ol.layer.Vector({
+            source: new ol.source.Vector({
+              url: 'https://openlayers.org/en/v4.6.5/examples/data/geojson/countries.geojson',
+              format: new ol.format.GeoJSON()
+            })
+          })
+        ],
+        target: 'map',
+        view: new ol.View({
+          center: [0, 0],
+          zoom: 2
+        })
+      });
 
-* `ol.interation.draw` 
-这个时openlayer提供的一个很有用很强大的交互功能，允许用户实时在地图上进行绘制 feature geometry 元素集合图形。  
-`new ol.interation.draw(options)`  
-  `features`  
-  `source`  
-  `type`  
-  `finishCondition`  
-  `geometryName`
+      var select = new ol.interaction.Select(); //创建一个选择交互行为
+      map.addInteraction(select); //该地图添加选择交互
+      var selectedFeatures = select.getFeatures(); 
+      var dragBox = new ol.interaction.DragBox(); //创建一个绘制矩形盒子的交互行为
+      map.addInteraction(dragBox); //添加到地图上
+
+      var vectorSources = [];
+      map.getLayers().forEach(function(layer) {
+          if (layer instanceof(ol.layer.Vector)) vectorSources.push(layer.getSource());
+      })
+      var vectorSource = vectorSources[0];
+      dragBox.on('boxend', function() {
+        var extent = dragBox.getGeometry().getExtent();
+        vectorSource.forEachFeatureIntersectingExtent(extent, function(feature) { //遍历矩形盒子范围内的feature
+          selectedFeatures.push(feature);  //添加到select的features集合中
+        });
+      });
+
+      dragBox.on('boxstart', function() {
+        selectedFeatures.clear();
+      });
+
+      selectedFeatures.on(['add', 'remove'], function() {
+        var names = selectedFeatures.getArray().map(function(feature) {
+          return feature.get('name');
+        });
+        if (names.length > 0) {
+          console.log(names.join(', '));
+        } else {
+          console.log('No countries selected');
+        }
+      });
+```
+
+* `ol.interaction.Draw`   
+这个是openlayer提供的一个很有用很强大的交互功能，允许用户实时在地图上进行绘制 feature geometry 元素几何图形。  
+`new ol.interaction.Draw(options)`  
+  `features`  绘制的目标元素集合，绘制的feature会添加到该目标元素集合
+  `source`  绘制的目标数据容器，绘制的feature会添加到该数据源容器中
+  `type`  绘制图形的类型，可选 Point/LineString/Polygon/MultiPoint/MultiLineString/MultiPolygon/Circle
+  `finishCondition`  一个回调函数根据传入`ol.MapBrowserEvent`浏览器事件返回true或者false决定绘制动作是否结束
+  `geometryName` 设置绘制的feature组成的几何图形的名字   
+  `geometryFunction` 当绘制的坐标点更新时调用的方法，可以通过该方法自定义绘制的图形
+
+```javascript
+var source = new ol.source.Vector();  //创建一个source容器
+var vector = new ol.layer.Vector({  //使用该source构造一个矢量图层，并且设置渲染样式
+  source: source,
+  style: new ol.style.Style({
+    fill: new ol.style.Fill({
+      color: 'rgba(255, 255, 255, 0.2)'
+    }),
+    stroke: new ol.style.Stroke({
+      color: '#ffcc33',
+      width: 2
+    }),
+    image: new ol.style.Circle({
+      radius: 7,
+      fill: new ol.style.Fill({
+        color: '#ffcc33'
+      })
+    })
+  })
+});
+
+var map = new ol.Map({  //使用上面的矢量图层创建一个地图实例
+  layers: [vector],
+  target: 'map',
+  view: new ol.View({
+    center: [0, 0],
+    zoom:4
+  })
+})
+
+var draw = new ol.interaction.Draw({
+  source: source，  //绘制的图形会添加到上面构造的的source中，最终渲染显示在地图map上
+  type: 'Circle',  //绘制一个圆形
+})
+
+map.addInteraction(draw); //地图添加绘制圆形的交互操作
+```
+有一些很有用的方法，说明如下：
+* `ol.interaction.Draw.createBox()` 返回一个绘制盒子形状的函数 ，利用该方法与``type:Circle``可以改变绘制的默认图形：
+```javascript
+var draw = new ol.interaction.Draw({
+  source: source,
+  type: 'Circle',
+  geometryFunction: ol.interaction.Draw.createBox() //type 选项设置绘制的图形是圆形，但是geometryFunction函数覆盖了type的作用，绘制出来的将会是矩形盒子
+})
+```
+* `ol.interaction.Draw.createRegularPolygon()` 返回一个绘制正多边形的函数 ，利用该方法与``type:Circle``可以改变绘制的默认图形：
+```javascript
+var draw = new ol.interaction.Draw({
+  source: source,
+  type: 'Circle',
+  geometryFunction: ol.interaction.Draw.createRegularPolygon({
+    sides: 5, //五边形
+    angle: 0 //第一个顶点的角度，默认是0
+  }) //type 选项设置绘制的图形是圆形，但是geometryFunction函数覆盖了type的作用，绘制出来的将会是正五边形
+})
+```
+* `ol.interaction.Draw.handleEvent` 绘制完成触发的事件
 
 # 9 视图 view 的相关操作
 # 10 control 控件

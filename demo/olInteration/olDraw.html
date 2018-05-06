@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>geometry</title>
+    <link rel="stylesheet" href="https://openlayers.org/en/v4.6.5/css/ol.css" type="text/css">
+    <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
+    <script src="https://openlayers.org/en/v4.6.5/build/ol.js"></script>
+    <meta charset="utf-8">
+    <style>    
+      #map:focus {
+        outline: #4A74A8 solid 0.15em;
+      }
+      #map {
+        width: calc(100% - 300px);
+        float: right;
+        background: #eee;
+      }
+      #control {
+        width: 250px;
+        float: left;
+      }
+      button {
+        border: solid 1px #eee;
+        background: #ddd;
+        border-radius: 2px;
+        padding: 5px;
+        cursor: pointer;
+      }
+      button:hover {
+        color: #fff;
+        background: #333;
+      }
+      fieldset {
+        border: solid 1px #ddd;
+        border-radius: 2px;
+      }
+      .ol-dragbox {
+        background-color: rgba(255,255,255,0.4);
+        border-color: rgba(100,150,0,1);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map" class="map" tabindex="0"></div>
+    <div id="control">
+
+    </div>
+    <script>
+
+      var map = new ol.Map({
+        layers: [
+          new ol.layer.Vector({
+            source: new ol.source.Vector({
+              url: 'https://openlayers.org/en/v4.6.5/examples/data/geojson/countries.geojson',
+              format: new ol.format.GeoJSON()
+            })
+          })
+        ],
+        target: 'map',
+        view: new ol.View({
+          center: [0, 0],
+          zoom: 2
+        })
+      });
+
+      var select = new ol.interaction.Select(); //创建一个选择交互行为
+      map.addInteraction(select); //该地图添加选择交互
+      var selectedFeatures = select.getFeatures(); 
+      var dragBox = new ol.interaction.DragBox(); //创建一个绘制矩形盒子的交互行为
+      map.addInteraction(dragBox); //添加到地图上
+ 
+      var vectorSources = [];
+      map.getLayers().forEach(function(layer) {
+          if (layer instanceof(ol.layer.Vector)) vectorSources.push(layer.getSource());
+      })
+      var vectorSource = vectorSources[0];
+      dragBox.on('boxend', function() {
+        var extent = dragBox.getGeometry().getExtent();
+        vectorSource.forEachFeatureIntersectingExtent(extent, function(feature) { //遍历矩形盒子范围内的feature
+          selectedFeatures.push(feature);  //添加到select的features集合中
+        });
+      });
+
+      dragBox.on('boxstart', function() {
+        selectedFeatures.clear();
+      });
+
+      var infoBox = document.getElementById('control');
+      selectedFeatures.on(['add', 'remove'], function() {  //监听元素添加/移除事件
+        var names = selectedFeatures.getArray().map(function(feature) {
+          return feature.get('name');
+        });
+        if (names.length > 0) {
+          infoBox.innerHTML  = names.join(', ');
+        } else {
+          infoBox.innerHTML  = 'No countries selected';
+        }
+      });
+    </script>
+  </body>
+</html>
