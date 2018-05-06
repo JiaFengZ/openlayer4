@@ -633,7 +633,7 @@ var interaction = new ol.interaction.DragAndDrop({
 ```
 
 * `ol.interaction.Select`   
-首先翻译一段来自官网API文档的原话来说明`ol.interaction.Select`的作用：这是为选择vector features（矢量元素）而设置的交互行为，通常而言被选择的feature具有不同的渲染样式style，因此这种选择元素的交互操作可以用来高亮特定的feature，也可以选择元素提供给其他的操作进行处理，例如修改编辑被选择的元素。有三种方式筛选要选择的元素：使用浏览器事件的 `condition`选项/ toggle add remove multi 选项/使用`filter`选项过滤函数。下面的例子（改造自[Box Selection](http://openlayers.org/en/latest/examples/box-selection.html)，我修改后的例子[olDraw](./demo/olInteraction/olDraw.html)）就展示使用`ol.interaction.Select`结合`ol.interaction.DragBox`选择地图元素的功能：
+首先翻译一段来自官网API文档的原话来说明`ol.interaction.Select`的作用：这是为选择vector features（矢量元素）而设置的交互行为，通常而言被选择的feature具有不同的渲染样式style，因此这种选择元素的交互操作可以用来高亮特定的feature，也可以选择元素提供给其他的操作进行处理，例如修改编辑被选择的元素。有三种方式筛选要选择的元素：使用浏览器事件的 `condition`选项/ toggle add remove multi 选项/使用`filter`选项过滤函数。下面的例子（改造自[Box Selection](http://openlayers.org/en/latest/examples/box-selection.html)，我修改后的例子[olDraw](https://jiafengz.github.io/openlayer4/demo/olInteraction/olDraw.html)）就展示使用`ol.interaction.Select`结合`ol.interaction.DragBox`选择地图元素的功能：
 ```javascript
       var map = new ol.Map({
         layers: [
