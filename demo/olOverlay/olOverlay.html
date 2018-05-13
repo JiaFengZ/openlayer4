@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>overlay</title>
+    <link rel="stylesheet" href="https://openlayers.org/en/v4.6.5/css/ol.css" type="text/css">
+    <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
+    <script src="https://openlayers.org/en/v4.6.5/build/ol.js"></script>
+    <meta charset="utf-8">
+    <style>    
+    #map:focus {
+        outline: #4A74A8 solid 0.15em;
+      }
+      #map {
+        width: calc(100% - 300px);
+        margin: 0 auto;
+        background: #eee;
+      }
+      .ol-popup {
+        position: absolute;
+        background-color: white;
+        -webkit-filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+        filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+        padding: 15px;
+        border-radius: 10px;
+        border: 1px solid #cccccc;
+        bottom: 12px;
+        left: -50px;
+        min-width: 100px;
+      }
+      .ol-popup:after, .ol-popup:before {
+        top: 100%;
+        border: solid transparent;
+        content: " ";
+        height: 0;
+        width: 0;
+        position: absolute;
+        pointer-events: none;
+      }
+      .ol-popup:after {
+        border-top-color: white;
+        border-width: 10px;
+        left: 48px;
+        margin-left: -10px;
+      }
+      .ol-popup:before {
+        border-top-color: #cccccc;
+        border-width: 11px;
+        left: 48px;
+        margin-left: -11px;
+      }
+      .ol-popup-closer {
+        text-decoration: none;
+        position: absolute;
+        top: 2px;
+        right: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map" class="map" tabindex="0"></div>
+    <script>
+     var source =  new ol.source.Vector({
+            url: 'https://openlayers.org/en/v4.6.5/examples/data/geojson/countries.geojson',
+            format: new ol.format.GeoJSON()
+      });
+      var layer = new ol.layer.Vector({
+          source: source
+      });
+
+      var map = new ol.Map({
+        layers: [layer],
+        target: 'map',
+        view: new ol.View({
+          center: [0, 0],
+          zoom: 2
+        })
+      });
+
+
+      source.on('change', function() {
+        if (source.getState() == 'ready') {
+            source.getFeatures().forEach(function(feature) {
+            var text = feature.get('name');
+            var geom = feature.getGeometry();
+            if (geom instanceof ol.geom.Polygon) {
+              var coords = geom.getInteriorPoint().getCoordinates();
+              createOverlay(text, coords)
+            }
+          })
+        }
+      })
+      
+
+      function createOverlay(text, coords) {
+        var ele = document.createElement('div');
+        ele.classList.add('ol-popup');
+        ele.innerHTML = '<a href="#" class="ol-popup-closer"></a>' +
+                                      '<div class="popup-content">'  + text +'</div>'
+        var marker = new ol.Overlay({
+          position: coords,
+          positioning: 'center-center',
+          element: ele,
+          stopEvent: true
+        });
+        map.addOverlay(marker);
+      }
+
+    </script>
+  </body>
+</html>

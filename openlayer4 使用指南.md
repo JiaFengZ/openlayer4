@@ -260,7 +260,7 @@ ol.source.Source ──├── ol.source.Image ──────├── ol.
 											
 ```
 特别值得注意的是 `ol.source.Vector` 格式的数据源所包含组织的features数据需要通过解析器进行数据解析，openlayer通过`ol.format.Feature`的子类来解析各种格式的矢量数据，比如`EsriJSON` `GeoJSON` `TopoJSON` `MVT` `Text` `XML`等格式。  
-上面只是一个粗略的介绍，更过细节可以参考 openlayer的手册，要了解更多个关于地图数据模型的内容可参考专业的WebGIS书籍。
+上面只是一个粗略的介绍，更多细节可以参考 openlayer的手册，要了解更多个关于地图数据模型的内容可参考专业的WebGIS书籍。
 
 ## 4.2 `ol.source.Source`基类上几个方法
 * getProjection() 获取投影坐标系
@@ -754,9 +754,85 @@ var draw = new ol.interaction.Draw({
 ```
 * `ol.interaction.Draw.handleEvent` 绘制完成触发的事件
 
-# 9 视图 view 的相关操作
-# 10 control 控件
-# 11 事件
+# 9 overlay 的使用
+## 9.1 `overlay`的属性及方法
+`ol.Overlay`顾名思义，就是地图上的浮层元素，不同于 map 地图上通过canvas绘图环境绘制的地图元素，`overlay`是完全我们自定义的普通html元素，有更多的控制自由度。因此通过 `overlay` 可以根据地理坐标创建自定义标注或者浮层/弹窗，移动地图`overlay`元素也会随着地图移动。  
+``new ol.Overlay(options)``<br/>
+``options.id`` 浮层元素id，设置id后可通过 ``getOverlayById(id)``获取该浮层元素<br/>
+``options.element`` 浮层元素，普通的html元素，例如 ``element: document.createElement('div')``<br/>
+``options.offset`` 定位浮层元素的偏移量，默认[0, 0]<br/>
+``options.position``  浮层元素的地理坐标<br/>
+``options.positioning`` 定位方式，可选：'bottom-left', 'bottom-center', 'bottom-right', 'center-left', 'center-center', 'center-right', 'top-left', 'top-center'<br/>
+``options.stopEvent`` 是否阻止overlay元素上的事件冒泡到map上，默认true，阻止冒泡<br/>
+``options.autoPan`` 是否自动移动地图使得overlay元素始终在可见范围<br/>
 
-# 12 overlay 的使用
-# 13 一些应用的例子
+方法：<br/>
+* getElement 获取overlay元素
+* getMap 获取关联的map对象
+* getOffset 获取相对定位坐标偏移量
+* getPosition 获取地理坐标
+* getPositioning 获取定位方式
+* setElement 设置浮层元素
+* setMap 设置关联的地图
+* setOffset 设置偏移量
+* setPosition 设置坐标
+* setPositioning 设置定位方式
+
+## 9.2 使用`overlay`在地图上放置标注[demo](https://jiafengz.github.io/openlayer4/demo/olOverlay/olOverlay.html)
+```javascript
+var source =  new ol.source.Vector({
+        url: 'https://openlayers.org/en/v4.6.5/examples/data/geojson/countries.geojson',
+        format: new ol.format.GeoJSON()
+  });
+  var layer = new ol.layer.Vector({
+      source: source
+  });
+
+  var map = new ol.Map({
+    layers: [layer],
+    target: 'map',
+    view: new ol.View({
+      center: [0, 0],
+      zoom: 2
+    })
+  });
+
+
+  source.on('change', function() {  //监听属性改变事件
+    if (source.getState() == 'ready') {  //当source加载完毕后获取feature的属性值，设置overlay
+        source.getFeatures().forEach(function(feature) {
+        var text = feature.get('name');
+        var geom = feature.getGeometry();
+        if (geom instanceof ol.geom.Polygon) {
+          var coords = geom.getInteriorPoint().getCoordinates();
+          createOverlay(text, coords); //生成overlay，显示feature的名字
+        }
+      })
+    }
+  })
+  
+
+  function createOverlay(text, coords) {
+    var ele = document.createElement('div');
+    ele.classList.add('ol-popup');
+    ele.innerHTML = '<a href="#" class="ol-popup-closer"></a>' +
+                                  '<div class="popup-content">'  + text +'</div>'
+    var marker = new ol.Overlay({
+      position: coords,
+      positioning: 'center-center',
+      element: ele,
+      stopEvent: true
+    });
+    map.addOverlay(marker);
+  }
+``` 
+# 10 事件
+# 11 一些应用的例子
+## 11.1 实现测量距离和面积
+## 11.2 判断点是否在面内
+## 11.3 拾取坐标
+## 11.4 点击地图获取点击点关联的 features
+## 11.5 根据 features 自适应设置地图extent显示范围
+## 11.6 热力图
+## 11.7 features 聚合显示
+## 11.8 移动鼠标高亮显示 feature 
