@@ -62,35 +62,33 @@ options.view 设置地图视图参数，使用new ol.View()构造
 
 ## 2.2 map 对象的方法
 写方法：  
-* addControl(new ol.control.Control(...)) 添加控件  
-* removeControl() 移除控件  
-* addInteraction(new ol.interaction.Interaction(...)) 添加交互行为   
-* removeInteraction() 移除交互行为  
-* addLayer(layer) 添加图层  
-* removeLayer() 移除图层  
-* addOverlay(new ol.Overlay(...)) 添加悬浮元素  
-* removeOverlay() 移除悬浮元素  
-* dispatchEvent(event) 手动触发事件，将会调用所有监听了该类型事件的监听回调函数  
+* addControl(new ol.control.Control(...)) 添加控件
+* removeControl() 移除控件
+* addInteraction(new ol.interaction.Interaction(...)) 添加交互行为
+* removeInteraction() 移除交互行为
+* addLayer(layer) 添加图层
+* removeLayer() 移除图层
+* addOverlay(new ol.Overlay(...)) 添加悬浮元素
+* removeOverlay() 移除悬浮元素
+* dispatchEvent(event) 手动触发事件，将会调用所有监听了该类型事件的监听回调函数
 
 读方法：  
-* getControls()
-* getInteractions()
-* getLayerGroup()
-* getView()
-* getLayers()
-* getOverlayById()
-* getOverlays()
-* getCoordinateFromPixel()
-* getEventCoordinate()
-* getEventPixel()
-* getFeaturesAtPixel()
-* getPixelFromCoordinate()
-
-* getRevision()
-* getSize()
-* getTarget()
-* getTargetElement()
-* getViewport()
+* getControls() 获取UI控件
+* getInteractions() 获取交互行为
+* getLayerGroup() 获取图层集合
+* getView() 获取视图
+* getLayers() 或如图层
+* getOverlayById() 通过id获取overlay浮层元素
+* getOverlays() 获取所有overlay浮层元素
+* getCoordinateFromPixel() 根据像素坐标获取在地图上的地理坐标
+* getEventCoordinate() 获取事件的地理坐标
+* getEventPixel() 获取事件的像素坐标
+* getFeaturesAtPixel() 获取某像素坐标点的features
+* getPixelFromCoordinate() 根据地理坐标获取像素坐标
+* getRevision() 获取map对象的版本号，每次map对象属性的改变都会使版本号(version number)递增
+* getSize() 获取地图大小
+* getTargetElement() 获取地图容器元素
+* getViewport() 获取视口
 
 
 绑定事件的方法：  
@@ -827,6 +825,7 @@ var source =  new ol.source.Vector({
   }
 ``` 
 # 10 事件
+## openlayer 的事件体系
 # 11 一些应用的例子
 ## 11.1 实现测量距离和面积
 ## 11.2 判断点是否在面内
