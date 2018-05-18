@@ -826,6 +826,28 @@ var source =  new ol.source.Vector({
 ``` 
 # 10 事件
 ## openlayer 的事件体系
+在 openlayer 中所有继承自``ol.Observable``类的对象都可以注册监听事件和取消事件，``ol.Observable``意为可观察对象，形象的说该类构造的对象的属性的改变是可以被外部感知的，并且提供了相应的方式通知外界我发生变化了。它通过``dispatchEvent``向外界派发事件，``unByKey``移除监听的事件，``on``以及``once``注册监听事件。openlayer中以下继承自``ol.Observable``的类的对象都具有相应的事件处理方法：
+* ``ol.Feature``
+* ``ol.geom.Geometry``
+* ``ol.interaction.Interaction``
+* ``ol.layer.Base``
+* ``ol.Overlay``
+* ``ol.source.Source``
+* ``ol.View``
+* ``ol.control.Control``
+* ``ol.Collection``
+* ``ol.Geolocation``
+可以看到很多熟悉的身影，我们一路讲来的 layer 图层、overlay 浮层、feature 地图元素、source 数据源对象、geometory 几何对象、view 视图、control 地图控件对象都在其中，事件体系是 openlayer 各类对象内部通信以及响应外部用户输入的基本机制。  
+``ol.events.Event``是事件类型管理的类，它管理``ol.Observable``类对象的各种事件类型，具有如下的属性和方法：
+* ``type`` 事件类型
+* ``target`` 事件触发对象
+* ``preventDefault()`` 阻止默认行为
+* ``stopPropagation()`` 阻止冒泡
+接下来会讨论其中几个重要的对象的事件：
+* ``ol.MapEvent`` 地图事件
+* ``ol.source.Vector.Event`` 矢量数据源事件
+* ``ol.source.Image.Event`` 图片数据源事件
+* ``ol.interaction.Draw.Event`` 绘制交互事件
 # 11 一些应用的例子
 ## 11.1 实现测量距离和面积
 ## 11.2 判断点是否在面内
