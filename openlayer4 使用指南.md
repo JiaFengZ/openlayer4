@@ -825,7 +825,7 @@ var source =  new ol.source.Vector({
   }
 ``` 
 # 10 事件
-## openlayer 的事件体系
+## 10.1 openlayer 的事件体系
 在 openlayer 中所有继承自``ol.Observable``类的对象都可以注册监听事件和取消事件，``ol.Observable``意为可观察对象，形象的说该类构造的对象的属性的改变是可以被外部感知的，并且提供了相应的方式通知外界我发生变化了。它通过``dispatchEvent``向外界派发事件，``unByKey``移除监听的事件，``on``以及``once``注册监听事件。openlayer中以下继承自``ol.Observable``的类的对象都具有相应的事件处理方法：
 * ``ol.Feature``
 * ``ol.geom.Geometry``
@@ -837,17 +837,47 @@ var source =  new ol.source.Vector({
 * ``ol.control.Control``
 * ``ol.Collection``
 * ``ol.Geolocation``
+
 可以看到很多熟悉的身影，我们一路讲来的 layer 图层、overlay 浮层、feature 地图元素、source 数据源对象、geometory 几何对象、view 视图、control 地图控件对象都在其中，事件体系是 openlayer 各类对象内部通信以及响应外部用户输入的基本机制。  
 ``ol.events.Event``是事件类型管理的类，它管理``ol.Observable``类对象的各种事件类型，具有如下的属性和方法：
 * ``type`` 事件类型
 * ``target`` 事件触发对象
 * ``preventDefault()`` 阻止默认行为
 * ``stopPropagation()`` 阻止冒泡
-接下来会讨论其中几个重要的对象的事件：
+
+其中几个重要的事件：
 * ``ol.MapEvent`` 地图事件
 * ``ol.source.Vector.Event`` 矢量数据源事件
 * ``ol.source.Image.Event`` 图片数据源事件
 * ``ol.interaction.Draw.Event`` 绘制交互事件
+
+## 10.2 `ol.MapEvent`
+* `moveend` 地图移动结束后触发
+* `movestart` 地图开始移动时触发
+* `postrender` 地图渲染后触发
+
+以下是`ol.MapEvent`的子类`ol.MapBrowserEvent`事件
+* `click` 单击
+* `singleclick` 单击，延迟15毫秒触发，确保不是双击
+* `dblclick` 双击，同时会触发两次单击click事件
+* `pointerdrag` 鼠标拖拽
+* `pointermove` 鼠标移动触发
+
+## 10.3 `ol.source.Vector.Event`
+* `addfeature` 添加feature时触发
+* `removefeature` 移除feature时触发
+* `clear` 调用clear方法时触发
+* `changefeature` 更新feature时触发
+
+## 10.4 `ol.source.Image.Event`
+* `imageloadend` 图片加载成功后触发
+* `imageloaderror` 图片加载失败触发
+* `imageloadstart` 图片开始加载时触发
+
+## 10.5 `ol.intreaction.Draw.Event`
+* `drawend` 绘制结束触发
+* `drawstart` 绘制开始触发
+
 # 11 一些应用的例子
 ## 11.1 实现测量距离和面积
 ## 11.2 判断点是否在面内
