@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>olEvent</title>
+    <link rel="stylesheet" href="https://openlayers.org/en/v4.6.5/css/ol.css" type="text/css">
+    <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
+    <script src="https://openlayers.org/en/v4.6.5/build/ol.js"></script>
+    <meta charset="utf-8">
+    <style>    
+      #map:focus {
+        outline: #4A74A8 solid 0.15em;
+      }
+      #map {
+        width: calc(100% - 300px);
+        margin: 0 auto;
+        background: #eee;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map" class="map" tabindex="0" title="单击地图中的feature图形"></div>
+    <script>
+      var feature1 = new ol.Feature({
+        geometry: new ol.geom.Circle([1e6, -2e6], 1e6)
+      })
+      var feature2 = new ol.Feature({
+        geometry: new ol.geom.LineString([[1e7, 1e6], [1e6, 3e6]])
+      })
+      var feature3 = new ol.Feature({
+        geometry: new ol.geom.Polygon([[[1e6, -1e6], [1e6, 1e6], [3e6, 1e6], [3e6, -1e6], [1e6, -1e6]]])
+      })
+      
+      
+      feature1.on('circleClick', function() {
+        alert('circle clicked');
+      })
+      feature2.on('lineClick', function() {
+        alert('Line clicked');
+      })
+      feature3.on('polygonClick', function() {
+        alert('Polygon clicked');
+      })
+
+      var layer = new ol.layer.Vector({
+        source: new ol.source.Vector({
+          features: [feature1, feature2, feature3]
+        }),
+        style: new ol.style.Style({
+            stroke: new ol.style.Stroke({
+              color: 'yellow',
+              width: 4
+            }),
+            fill: new ol.style.Fill({
+              color: 'blue'
+            })
+        })
+      })
+
+      var map = new ol.Map({
+        layers: [],
+        view: new ol.View({
+          center: [0, 0], 
+          zoom: 4
+        }),
+        target: 'map'
+      });
+
+      map.addLayer(layer);
+
+      map.on('singleclick', function(event) {
+        map.getFeaturesAtPixel(event.pixel).forEach(function(feature) {
+          var geo = feature.getGeometry();
+          if (geo instanceof ol.geom.Circle) {
+            feature.dispatchEvent({type: 'circleClick', event: event})
+          } else if (geo instanceof ol.geom.LineString) {
+            feature.dispatchEvent({type: 'lineClick', event: event})
+          } else if(geo instanceof ol.geom.Polygon) {
+            feature.dispatchEvent({type: 'polygonClick', event: event})
+          }
+        })
+      })
+    </script>
+  </body>
+</html>

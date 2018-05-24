@@ -878,6 +878,71 @@ var source =  new ol.source.Vector({
 * `drawend` 绘制结束触发
 * `drawstart` 绘制开始触发
 
+## 自定义事件（[demo](https://jiafengz.github.io/openlayer4/demo/olEvent/map.html)）
+通过 dispatch 可以派发自定义事件，观察者通过 on 订阅事件，比如说我们要为 map 绑定一个 singleclick 单击事件，根据单击的拾取到的 feature 的类型分别派发不同类型的事件：
+```javascript
+var feature1 = new ol.Feature({
+  geometry: new ol.geom.Circle([1e6, -2e6], 1e6)
+})
+var feature2 = new ol.Feature({
+  geometry: new ol.geom.LineString([[1e7, 1e6], [1e6, 3e6]])
+})
+var feature3 = new ol.Feature({
+  geometry: new ol.geom.Polygon([[[1e6, -1e6], [1e6, 1e6], [3e6, 1e6], [3e6, -1e6], [1e6, -1e6]]])
+})
+
+//feature订阅自定义事件
+feature1.on('circleClick', function() {
+  alert('circle clicked');
+})
+feature2.on('lineClick', function() {
+  alert('Line clicked');
+})
+feature3.on('polygonClick', function() {
+  alert('Polygon clicked');
+})
+
+var layer = new ol.layer.Vector({
+  source: new ol.source.Vector({
+    features: [feature1, feature2, feature3]
+  }),
+  style: new ol.style.Style({
+      stroke: new ol.style.Stroke({
+        color: 'yellow',
+        width: 4
+      }),
+      fill: new ol.style.Fill({
+        color: 'blue'
+      })
+  })
+})
+
+var map = new ol.Map({
+  layers: [],
+  view: new ol.View({
+    center: [0, 0], 
+    zoom: 4
+  }),
+  target: 'map'
+});
+
+map.addLayer(layer);
+
+//map绑定单击事件，根据点击到feature类型派发不同类型的自定义事件
+map.on('singleclick', function(event) {
+  map.getFeaturesAtPixel(event.pixel).forEach(function(feature) {
+    var geo = feature.getGeometry();
+    if (geo instanceof ol.geom.Circle) {
+      feature.dispatchEvent({type: 'circleClick', event: event})
+    } else if (geo instanceof ol.geom.LineString) {
+      feature.dispatchEvent({type: 'lineClick', event: event})
+    } else if(geo instanceof ol.geom.Polygon) {
+      feature.dispatchEvent({type: 'polygonClick', event: event})
+    }
+  })
+})
+```
+
 # 11 一些应用的例子
 ## 11.1 实现测量距离和面积
 ## 11.2 判断点是否在面内
