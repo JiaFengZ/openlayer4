@@ -949,13 +949,16 @@ map.on('singleclick', function(event) {
 * 鼠标移动到地图上时，鼠标形状用自定义的画笔代替，并且提示``单击开始测量``
 * 单击确定起点后，移动画笔，提示``单击绘制下一个节点``,同时显示当前已绘制的实时路径和距离
 * 双击结束绘制，地图上显示绘制的路径和测量得出的距离值<br/>
+
 测面积：
 * 鼠标移动到地图上时，鼠标形状用自定义的画笔代替，并且提示``单击绘制区域第一个顶点``
 * 单击确定起点后，移动画笔，提示``单击绘制下一个节顶点``,同时显示当前已绘制的多边形区域的面积
 * 双击结束绘制，地图上显示绘制的多边形区域和测量得出的面积<br/>
+
 本应用改编自[measure](http://openlayers.org/en/latest/examples/measure.html?q=measure)，我修改后的例子[measure](https://jiafengz.github.io/openlayer4/demo/application/measure.html)，有如下变化：
 * 使用面向对象的方式重构了代码，`Measure`为父类，`Distance`和`Area`为测量子类
 * 更换了地图底图中心位置
+
 主干代码如下
 ```javascript
 //创建帮助提示语overlay
