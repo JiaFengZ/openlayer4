@@ -945,6 +945,189 @@ map.on('singleclick', function(event) {
 
 # 11 一些应用的例子
 ## 11.1 实现测量距离和面积
+首先提出一些具体交互要求，测距：
+* 鼠标移动到地图上时，鼠标形状用自定义的画笔代替，并且提示``单击开始测量``
+* 单击确定起点后，移动画笔，提示``单击绘制下一个节点``,同时显示当前已绘制的实时路径和距离
+* 双击结束绘制，地图上显示绘制的路径和测量得出的距离值<br/>
+测面积：
+* 鼠标移动到地图上时，鼠标形状用自定义的画笔代替，并且提示``单击绘制区域第一个顶点``
+* 单击确定起点后，移动画笔，提示``单击绘制下一个节顶点``,同时显示当前已绘制的多边形区域的面积
+* 双击结束绘制，地图上显示绘制的多边形区域和测量得出的面积<br/>
+本应用改编自[measure](http://openlayers.org/en/latest/examples/measure.html?q=measure)，我修改后的例子[measure](https://jiafengz.github.io/openlayer4/demo/application/measure.html)，有如下变化：
+* 使用面向对象的方式重构了代码，`Measure`为父类，`Distance`和`Area`为测量子类
+* 更换了地图底图中心位置
+主干代码如下
+```javascript
+//创建帮助提示语overlay
+function HelpInfo(map) {
+  var helpInfoEle = document.createElement('div');
+  helpInfoEle.className = 'tooltip';
+  var overlay = new ol.Overlay({
+    element: helpInfoEle,
+    offset: [0, 20],
+    positioning: 'center-top'
+  });
+  map.addOverlay(overlay);
+
+  this.setPosition = function(coords) {
+    overlay.setPosition(coords);
+  };
+  this.setInfoText = function(text) {
+    helpInfoEle.innerHTML = text;
+  };
+  this.destroy = function() {
+    map.removeOverlay(overlay);
+  }
+}
+//创建测量结果显示框overlay
+function ResultInfo(map) {
+  var resultEle = document.createElement('div');
+  resultEle.className = 'tooltip tooltip-measure';
+  var overlay = new ol.Overlay({
+    element: resultEle,
+    offset: [10, -25],
+    positioning: 'center-center'
+  });
+  map.addOverlay(overlay);
+
+  this.setPosition = function(coords) {
+    overlay.setPosition(coords);
+  };
+  this.setInfoText = function(text) {
+    resultEle.innerHTML = text;
+  };
+  this.destroy = function() {
+    map.removeOverlay(overlay);
+  }
+}
+//计算线段的长度
+function calcuateLength(line) {
+  var length = ol.Sphere.getLength(line);
+  var output;
+  if (length > 100) {
+    output = (Math.round(length / 1000 * 100) / 100) +
+        ' ' + 'km';
+  } else {
+    output = (Math.round(length * 100) / 100) +
+        ' ' + 'm';
+  }
+  return output;
+}
+//计算面积
+function calcuateArea(polygon) {
+  var area = ol.Sphere.getArea(polygon);
+  var output;
+  if (area > 10000) {
+    output = (Math.round(area / 1000000 * 100) / 100) +
+        ' ' + 'km<sup>2</sup>';
+  } else {
+    output = (Math.round(area * 100) / 100) +
+        ' ' + 'm<sup>2</sup>';
+  }
+  return output;
+}
+//添加绘制线段测量距离的interaction
+function Measure(map, source, type) {
+  this.map = map;
+  this.source = source;
+  this.drawListener = null;
+  this.feature = null;
+  this.pointermove = null;
+  this.helpInfo = new HelpInfo(map);
+  this.resultInfo = new ResultInfo(map);
+  this.calcuate = function() {};
+  var that = this;
+
+  this.draw = new ol.interaction.Draw({
+    source: source,
+    type: type,
+    style: new ol.style.Style({
+      fill: new ol.style.Fill({
+        color: 'rgba(255, 255, 255, 0.2)'
+      }),
+      stroke: new ol.style.Stroke({
+        color: 'rgba(0, 0, 0, 0.5)',
+        lineDash: [10, 10],
+        width: 2
+      }),
+      image: new ol.style.Circle({
+        radius: 5,
+        stroke: new ol.style.Stroke({
+          color: 'rgba(0, 0, 0, 0.7)'
+        }),
+        fill: new ol.style.Fill({
+          color: 'rgba(255, 255, 255, 0.2)'
+        })
+      })
+    })
+  });
+  that.draw.on('drawstart', function(event) {
+    that.clear();
+    that.feature  = event.feature;
+    that.drawListener = that.feature.getGeometry().on('change', function(evt) {
+      var geom = evt.target;
+      var output;
+      output = that.calcuate(geom);
+      that.resultInfo.setInfoText(output);
+      if (geom instanceof ol.geom.LineString) {
+        that.resultInfo.setPosition(geom.getLastCoordinate());
+      } else if (geom instanceof ol.geom.Polygon) {
+        that.resultInfo.setPosition(geom.getInteriorPoint().getCoordinates());
+      }
+    });          
+  }, this);
+
+  that.draw.on('drawend', function() {
+    ol.Observable.unByKey(that.drawListener);   
+    that.feature = null;        
+  }, this);
+
+  this.pointermove = function(evt) {
+    if (evt.dragging) {
+      return;
+    }
+    var helpMsg = '单击第一个点开始测量';
+    if (that.feature) {
+      var geom = that.feature.getGeometry();
+      if (geom instanceof ol.geom.LineString) {
+        helpMsg = '单击点继续，或者双击结束';
+      } else if (geom instanceof ol.geom.Polygon) {
+        helpMsg = '单击绘制下一个顶点，后者双击结束绘制';
+      }
+    }
+    that.helpInfo.setInfoText(helpMsg);
+    that.helpInfo.setPosition(evt.coordinate);
+  }        
+
+  this.init = function() {
+    map.on('pointermove', this.pointermove);
+    map.addInteraction(that.draw);          
+  };
+  this.clear = function() {
+    this.source.clear();
+    that.feature = null;
+  };
+  this.destroy = function() {
+    this.clear();
+    map.removeInteraction(that.draw);
+    this.helpInfo.destroy();
+    this.resultInfo.destroy();
+    map.un('pointermove', that.pointermove);
+    this.helpInfo = null;
+    this.resultInfo = null;
+  };
+}
+
+function Distance(map, source) {
+  Measure.call(this, map, source, 'LineString');
+  this.calcuate = calcuateLength;        
+}
+
+function Area(map, source) {
+  Measure.call(this, map, source, 'Polygon');
+  this.calcuate = calcuateArea;        
+}
+```
 ## 11.2 判断点是否在面内
 ## 11.3 拾取坐标
 ## 11.4 点击地图获取点击点关联的 features

@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>measure</title>
+    <link rel="stylesheet" href="https://openlayers.org/en/v4.6.5/css/ol.css" type="text/css">
+    <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
+    <script src="https://openlayers.org/en/v4.6.5/build/ol.js"></script>
+    <meta charset="utf-8">
+    <style>    
+      #map:focus {
+        outline: #4A74A8 solid 0.15em;
+      }
+      #map {
+        width: calc(100% - 300px);
+        margin: 0 auto;
+        background: #eee;
+      }
+      .tooltip {
+        position: relative;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 4px;
+        color: white;
+        padding: 4px 8px;
+        opacity: 0.7;
+        white-space: nowrap;
+      }
+      .tooltip-measure {
+        opacity: 1;
+        font-weight: bold;
+      }
+      .tooltip-static {
+        background-color: #ffcc33;
+        color: black;
+        border: 1px solid white;
+      }
+      .tooltip-measure:before,
+      .tooltip-static:before {
+        border-top: 6px solid rgba(0, 0, 0, 0.5);
+        border-right: 6px solid transparent;
+        border-left: 6px solid transparent;
+        content: "";
+        position: absolute;
+        bottom: -6px;
+        margin-left: -7px;
+        left: 50%;
+      }
+      .tooltip-static:before {
+        border-top-color: #ffcc33;
+      }    
+      button {
+        border: solid 1px #eee;
+        background: #ddd;
+        border-radius: 2px;
+        padding: 5px;
+        cursor: pointer;
+      }
+      button:hover, button.active {
+        color: #fff;
+        background: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map" class="map" tabindex="0"></div>
+    <button style="margin-left:150px;" class="active" id="button1" onclick="measureDistance()">测量距离</button>
+    <button id="button2" onclick="measureArea()">测量面积</button>
+    <script>
+      //创建帮助提示语overlay
+      function HelpInfo(map) {
+        var helpInfoEle = document.createElement('div');
+        helpInfoEle.className = 'tooltip';
+        var overlay = new ol.Overlay({
+          element: helpInfoEle,
+          offset: [0, 20],
+          positioning: 'center-top'
+        });
+        map.addOverlay(overlay);
+
+        this.setPosition = function(coords) {
+          overlay.setPosition(coords);
+        };
+        this.setInfoText = function(text) {
+          helpInfoEle.innerHTML = text;
+        };
+        this.destroy = function() {
+          map.removeOverlay(overlay);
+        }
+      }
+      //创建测量结果显示框overlay
+      function ResultInfo(map) {
+        var resultEle = document.createElement('div');
+        resultEle.className = 'tooltip tooltip-measure';
+        var overlay = new ol.Overlay({
+          element: resultEle,
+          offset: [10, -25],
+          positioning: 'center-center'
+        });
+        map.addOverlay(overlay);
+
+        this.setPosition = function(coords) {
+          overlay.setPosition(coords);
+        };
+        this.setInfoText = function(text) {
+          resultEle.innerHTML = text;
+        };
+        this.destroy = function() {
+          map.removeOverlay(overlay);
+        }
+      }
+      //计算线段的长度
+      function calcuateLength(line) {
+        var length = ol.Sphere.getLength(line);
+        var output;
+        if (length > 100) {
+          output = (Math.round(length / 1000 * 100) / 100) +
+              ' ' + 'km';
+        } else {
+          output = (Math.round(length * 100) / 100) +
+              ' ' + 'm';
+        }
+        return output;
+      }
+      //计算面积
+      function calcuateArea(polygon) {
+        var area = ol.Sphere.getArea(polygon);
+        var output;
+        if (area > 10000) {
+          output = (Math.round(area / 1000000 * 100) / 100) +
+              ' ' + 'km<sup>2</sup>';
+        } else {
+          output = (Math.round(area * 100) / 100) +
+              ' ' + 'm<sup>2</sup>';
+        }
+        return output;
+      }
+      //添加绘制线段测量距离的interaction
+      function Measure(map, source, type) {
+        this.map = map;
+        this.source = source;
+        this.drawListener = null;
+        this.feature = null;
+        this.pointermove = null;
+        this.helpInfo = new HelpInfo(map);
+        this.resultInfo = new ResultInfo(map);
+        this.calcuate = function() {};
+        var that = this;        
+
+        this.draw = new ol.interaction.Draw({
+          source: source,
+          type: type,
+          style: new ol.style.Style({
+            fill: new ol.style.Fill({
+              color: 'rgba(255, 255, 255, 0.2)'
+            }),
+            stroke: new ol.style.Stroke({
+              color: 'rgba(0, 0, 0, 0.5)',
+              lineDash: [10, 10],
+              width: 2
+            }),
+            image: new ol.style.Circle({
+              radius: 5,
+              stroke: new ol.style.Stroke({
+                color: 'rgba(0, 0, 0, 0.7)'
+              }),
+              fill: new ol.style.Fill({
+                color: 'rgba(255, 255, 255, 0.2)'
+              })
+            })
+          })
+        });
+        that.draw.on('drawstart', function(event) {
+          that.clear();
+          that.feature  = event.feature;
+          that.drawListener = that.feature.getGeometry().on('change', function(evt) {
+            var geom = evt.target;
+            var output;
+            output = that.calcuate(geom);
+            that.resultInfo.setInfoText(output);
+            if (geom instanceof ol.geom.LineString) {
+              that.resultInfo.setPosition(geom.getLastCoordinate());
+            } else if (geom instanceof ol.geom.Polygon) {
+              that.resultInfo.setPosition(geom.getInteriorPoint().getCoordinates());
+            }
+          });          
+        }, this);
+
+        that.draw.on('drawend', function() {
+          ol.Observable.unByKey(that.drawListener);   
+          that.feature = null;        
+        }, this);
+
+        this.pointermove = function(evt) {
+          if (evt.dragging) {
+            return;
+          }
+          var helpMsg = '单击第一个点开始测量';
+          if (that.feature) {
+            var geom = that.feature.getGeometry();
+            if (geom instanceof ol.geom.LineString) {
+              helpMsg = '单击点继续，或者双击结束';
+            } else if (geom instanceof ol.geom.Polygon) {
+              helpMsg = '单击绘制下一个顶点，后者双击结束绘制';
+            }
+          }
+          that.helpInfo.setInfoText(helpMsg);
+          that.helpInfo.setPosition(evt.coordinate);
+        }        
+
+        this.init = function() {
+          map.on('pointermove', this.pointermove);
+          map.addInteraction(that.draw);          
+        };
+        this.clear = function() {
+          this.source.clear();
+          that.feature = null;
+        };
+        this.destroy = function() {
+          this.clear();
+          map.removeInteraction(that.draw);
+          this.helpInfo.destroy();
+          this.resultInfo.destroy();
+          map.un('pointermove', that.pointermove);
+          this.helpInfo = null;
+          this.resultInfo = null;
+        };
+      }
+
+      function Distance(map, source) {
+        Measure.call(this, map, source, 'LineString');
+        this.calcuate = calcuateLength;        
+      }
+
+      function Area(map, source) {
+        Measure.call(this, map, source, 'Polygon');
+        this.calcuate = calcuateArea;        
+      }
+
+      var raster = new ol.layer.Tile({
+        source: new ol.source.OSM()
+      });
+
+      var source = new ol.source.Vector();
+
+      var vector = new ol.layer.Vector({
+        source: source,
+        style: new ol.style.Style({
+          fill: new ol.style.Fill({
+            color: 'rgba(255, 255, 255, 0.2)'
+          }),
+          stroke: new ol.style.Stroke({
+            color: '#ffcc33',
+            width: 2
+          }),
+          image: new ol.style.Circle({
+            radius: 7,
+            fill: new ol.style.Fill({
+              color: '#ffcc33'
+            })
+          })
+        })
+      });
+
+      var map = new ol.Map({
+        layers: [raster, vector],
+        target: 'map',
+        view: new ol.View({
+          center: ol.proj.fromLonLat([113.331, 23.143]),//[-11000000, 4600000],
+          zoom: 15
+        })
+      });
+      
+      var distance, area;
+      var measureDistance = function() {
+        document.getElementById('button1').classList.add('active');
+        document.getElementById('button2').classList.remove('active');
+        if (area instanceof Area) {
+          area.destroy();
+          area = null;
+        }    
+        if (distance instanceof Distance) {
+          return;
+        }    
+        distance = new Distance(map, source);
+        distance.init();
+      };
+      var measureArea = function() {
+        document.getElementById('button1').classList.remove('active');
+        document.getElementById('button2').classList.add('active');
+        if (distance instanceof Distance) {
+          distance.destroy();
+          distance = null;
+        }
+        if (area instanceof Area) {
+          return;
+        } 
+        area = new Area(map, source);
+        area.init();
+      };
+      measureDistance();
+    </script>
+  </body>
+</html>
