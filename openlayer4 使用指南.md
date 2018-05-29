@@ -18,7 +18,7 @@ openlayer 的结构就是由上面提到的几个关键概念为骨架组建的�
 
 除了以上几个核心的类，还有几个重要的工具类:   
 	`ol.style` 管理地图元素(`features`)的渲染样式    
-	`ol.coordinate` 封装了坐标相关的操作，比如说坐标变换   
+	`ol.proj` 封装了坐标相关的操作，比如说坐标变换   
 	`ol.events` 事件，`ol.events.Event`实现了各种事件接口，其下又有若干对应不同触发对象的事件类，比如`ol.MapEvent`就是负责`map`触发的事件，`ol.Map`中就有定义能够触发的事件类型。  
 
 # 2 ol.Map([demo](https://jiafengz.github.io/openlayer4/demo/olMap/baseMap.html))
@@ -1029,7 +1029,7 @@ function calcuateArea(polygon) {
   }
   return output;
 }
-//添加绘制线段测量距离的interaction
+//测量类构造函数
 function Measure(map, source, type) {
   this.map = map;
   this.source = source;
@@ -1102,7 +1102,7 @@ function Measure(map, source, type) {
     that.helpInfo.setPosition(evt.coordinate);
   }        
 
-  this.init = function() {
+  this.init = function() { //初始化方法
     map.on('pointermove', this.pointermove);
     map.addInteraction(that.draw);          
   };
@@ -1110,7 +1110,7 @@ function Measure(map, source, type) {
     this.source.clear();
     that.feature = null;
   };
-  this.destroy = function() {
+  this.destroy = function() { //销毁方法
     this.clear();
     map.removeInteraction(that.draw);
     this.helpInfo.destroy();
@@ -1120,21 +1120,21 @@ function Measure(map, source, type) {
     this.resultInfo = null;
   };
 }
-
+//距离测量类
 function Distance(map, source) {
   Measure.call(this, map, source, 'LineString');
   this.calcuate = calcuateLength;        
 }
-
+//面积测量类
 function Area(map, source) {
   Measure.call(this, map, source, 'Polygon');
   this.calcuate = calcuateArea;        
 }
 ```
-## 11.2 判断点是否在面内
-## 11.3 拾取坐标
-## 11.4 点击地图获取点击点关联的 features
-## 11.5 根据 features 自适应设置地图extent显示范围
-## 11.6 热力图
+## 11.2 热力图
+## 11.3 判断点是否在面内
+## 11.4 拾取坐标
+## 11.5 点击地图获取点击点关联的 features
+## 11.6 根据 features 自适应设置地图extent显示范围
 ## 11.7 features 聚合显示
 ## 11.8 移动鼠标高亮显示 feature 

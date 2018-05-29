@@ -134,7 +134,7 @@
         }
         return output;
       }
-      //添加绘制线段测量距离的interaction
+      //测量类构造函数
       function Measure(map, source, type) {
         this.map = map;
         this.source = source;
@@ -226,11 +226,13 @@
         };
       }
 
+      //距离测量类
       function Distance(map, source) {
         Measure.call(this, map, source, 'LineString');
         this.calcuate = calcuateLength;        
       }
 
+      //面积测量类
       function Area(map, source) {
         Measure.call(this, map, source, 'Polygon');
         this.calcuate = calcuateArea;        
