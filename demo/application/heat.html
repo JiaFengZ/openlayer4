@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>heat</title>
+    <link rel="stylesheet" href="https://openlayers.org/en/v4.6.5/css/ol.css" type="text/css">
+    <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
+    <script src="https://openlayers.org/en/v4.6.5/build/ol.js"></script>
+    <meta charset="utf-8">
+    <style>    
+      #map:focus {
+        outline: #4A74A8 solid 0.15em;
+      }
+      #map {
+        width: calc(100% - 300px);
+        margin: 0 auto;
+        background: #eee;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map" class="map" tabindex="0"></div>
+    <script>
+      
+      var vector = new ol.layer.Heatmap({
+        source: new ol.source.Vector({
+          url: 'heat.geojson',
+          format: new ol.format.GeoJSON()
+        }),
+        blur: 20,
+        radius: 10
+      });
+
+      var map = new ol.Map({
+        layers: [
+          new ol.layer.Tile({
+            source: new ol.source.OSM()
+          }),
+          vector
+        ],
+        target: 'map',
+        view: new ol.View({
+          center: ol.proj.fromLonLat([113.331, 23.143]),//[-11000000, 4600000],
+          zoom: 15
+        })
+      });
+      
+    </script>
+  </body>
+</html>

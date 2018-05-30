@@ -21,7 +21,8 @@ openlayer 的结构就是由上面提到的几个关键概念为骨架组建的�
 	`ol.proj` 封装了坐标相关的操作，比如说坐标变换   
 	`ol.events` 事件，`ol.events.Event`实现了各种事件接口，其下又有若干对应不同触发对象的事件类，比如`ol.MapEvent`就是负责`map`触发的事件，`ol.Map`中就有定义能够触发的事件类型。  
 
-# 2 ol.Map([demo](https://jiafengz.github.io/openlayer4/demo/olMap/baseMap.html))
+# 2 ol.Map
+[demo](https://jiafengz.github.io/openlayer4/demo/olMap/baseMap.html)
 `map` 是 `openlayer` 的核心，`map` 是渲染视图、图层的容器，如下构造一个 `map` 地图容器：
 ```javasctipt
 var map = ol.Map({
@@ -101,7 +102,8 @@ options.view 设置地图视图参数，使用new ol.View()构造
 * hasFeatureAtPixel() 判断特定像素点位置是否包含 `features`  
 * updateSize() 重新计算地图视口大小(viewport)  
 
-# 3 layer([demo](https://jiafengz.github.io/openlayer4/demo/olLayer/map.html))
+# 3 layer
+[demo](https://jiafengz.github.io/openlayer4/demo/olLayer/map.html)
 `ol.layer.Layer`可以创建图层，其下的子类 `ol.layer.Image` `ol.layer.Tile` `ol.layer.Vector`可创建不同格式数据源的图层。  
 首先看看 `ol.layer.Layer` 的构造方法：
 `new ol.layer.Layer(options)`:
@@ -240,7 +242,8 @@ var vectorLayer = new ol.layer.Vector({
 
 ```
 
-# 4 source([demo](https://jiafengz.github.io/openlayer4/demo/olSource/map.html))
+# 4 source
+[demo](https://jiafengz.github.io/openlayer4/demo/olSource/map.html)
 ## 4.1 `source`的几种数据格式
 在深入 `source`的API使用前，有必要先分析一下不同的数据源格式，简单来说可以分为 `Image` `Vector` `Tile`三大类型的数据源，`Image`和`Tile`本质上都是图片或者图片集，`Vector`则是矢量数据源，其分别对应 GIS 的两种数据存储模型：矢量数据模型和栅格数据模型，矢量数据模型以离散的点坐标表示地理元素，通过点、线、面几何元素表达地图的空间元素，数据存储以对象作为单位，一般行政边界、街道会采用矢量数据存储模型。而栅格数据模型则是以一系列基于网格的不同颜色和灰度的像素元来表示空间元素，适用于连续空间变化的空间数据，比如遥感地图。对应于web端的二维地图就是矢量地图和瓦片地图两种形式，矢量地图就是采用矢量数据模型存储的矢量数据组织的地图，服务端返回的是点、线、面等离散的数据对象，瓦片地图则是根据缩放层级和显示范围计算获取相应图片，在web端拼接成一张完整的地图。回到`openlayer`的`Image` `Tile` `Vector` 三大类型数据源，`Image`和`Tile`返回的就是图片集，`Vector`返回的是离散的数据对象。  
 在 `openlayer` 中这三者有可向下扩展细分若干子类：  
@@ -354,7 +357,8 @@ feature.setGeometryName('labelPoint'); //setGeometryName(labelPoint)更改渲染
 ## 5.2 `feature` `source` `layer` `map`之间的关系小结
 到这里，我们已经按照由上层到底层的顺序分析了 `map` → `layer` → `source` → `feature`(vector)，`map`有一个或者多个`layer`组成，而`source`则是构造`layer`的数据源，对于`vector`类型的`source`我们显然有更多的控制权，在页面中通过js可以对矢量图层进行一定程度上的编辑，`vector`类型的`source`是通过`feature`集合构造组成的，对矢量图层的操作归根到底是对`feature`的操作，`feature`控制着要渲染显示的点、线、面以及渲染的样式，比如说填充、描边的颜色、线型、线宽甚至文字。下一节将会介绍与`feature`关系紧密的`geometry`几何对象。
 
-# 6 `geometry` 几何对象[demo](https://jiafengz.github.io/openlayer4/demo/olGeom/map.html)
+# 6 `geometry` 几何对象
+[demo](https://jiafengz.github.io/openlayer4/demo/olGeom/map.html)
 上一节简单介绍了`feature`，`feature`是一个表层的概念，其关键还是`geometry`几何对象，不同的`geometry`决定了`feature`的不同表现形式。  
 `ol.geom.GeometryType`定义了`geometry`的类型：
 * `Circle` 圆
@@ -776,7 +780,8 @@ var draw = new ol.interaction.Draw({
 * setPosition 设置坐标
 * setPositioning 设置定位方式
 
-## 9.2 使用`overlay`在地图上放置标注[demo](https://jiafengz.github.io/openlayer4/demo/olOverlay/olOverlay.html)
+## 9.2 使用`overlay`在地图上放置标注
+[demo](https://jiafengz.github.io/openlayer4/demo/olOverlay/olOverlay.html)
 ```javascript
 var source =  new ol.source.Vector({
         url: 'https://openlayers.org/en/v4.6.5/examples/data/geojson/countries.geojson',
@@ -878,7 +883,8 @@ var source =  new ol.source.Vector({
 * `drawend` 绘制结束触发
 * `drawstart` 绘制开始触发
 
-## 自定义事件（[demo](https://jiafengz.github.io/openlayer4/demo/olEvent/map.html)）
+## 10.6 自定义事件
+[demo](https://jiafengz.github.io/openlayer4/demo/olEvent/map.html)
 通过 dispatch 可以派发自定义事件，观察者通过 on 订阅事件，比如说我们要为 map 绑定一个 singleclick 单击事件，根据单击的拾取到的 feature 的类型分别派发不同类型的事件：
 ```javascript
 var feature1 = new ol.Feature({
