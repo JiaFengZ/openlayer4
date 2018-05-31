@@ -2,8 +2,7 @@
 <html>
   <head>
     <title>heat</title>
-    <link rel="stylesheet" href="https://openlayers.org/en/v4.6.5/css/ol.css" type="text/css">
-    <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
+    <link rel="stylesheet" href="https://openlayers.org/en/v4.6.5/css/ol.css" type="text/css">    
     <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
     <script src="https://openlayers.org/en/v4.6.5/build/ol.js"></script>
     <meta charset="utf-8">
@@ -21,12 +20,33 @@
   <body>
     <div id="map" class="map" tabindex="0"></div>
     <script>
-      
+      var xhr = new XMLHttpRequest();
+      xhr.responseType = 'text';      
+      xhr.onload = function() {        
+        var allRows = xhr.responseText.split(/\r?\n|\r/);
+        allRows.shift();
+        var points = allRows.map(function(row) {
+          var item = row.split(',');
+          var coords = row.match(/"(.*)"/)[1].split(',');
+          return {
+            coords: [parseFloat(coords[0]), parseFloat(coords[1])],
+            name: item[2],
+            city: item[0]
+          }
+        })
+
+        var features = points.map(function(point) {
+          return new ol.Feature({
+            geometry: new ol.geom.Point(ol.proj.fromLonLat(point.coords))
+          })        
+        })
+        vector.getSource().addFeatures(features);
+      }
+      xhr.open('GET', 'china5a.csv', true);
+      xhr.send();
+
       var vector = new ol.layer.Heatmap({
-        source: new ol.source.Vector({
-          url: 'heat.geojson',
-          format: new ol.format.GeoJSON()
-        }),
+        source: new ol.source.Vector(),
         blur: 20,
         radius: 10
       });
@@ -40,8 +60,8 @@
         ],
         target: 'map',
         view: new ol.View({
-          center: ol.proj.fromLonLat([113.331, 23.143]),//[-11000000, 4600000],
-          zoom: 15
+          center: ol.proj.fromLonLat([107.27, 33.21]),//[-11000000, 4600000],
+          zoom: 5
         })
       });
       

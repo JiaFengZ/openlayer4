@@ -1187,6 +1187,43 @@ function Area(map, source) {
 }
 ```
 ## 11.2 热力图
+这次我们通过热力图的形式把全国5a景区分布展示出来，关键逻辑如下：
+* ol.layer.Heatmap 构造热力图层
+```javascript
+var vector = new ol.layer.Heatmap({
+  source: new ol.source.Vector(),
+  blur: 20,
+  radius: 10
+});
+```
+* 通过XMLHttpRequest读取csv数据
+```javascript
+var xhr = new XMLHttpRequest();
+xhr.responseType = 'text';
+xhr.onload = function() {
+  var allRows = xhr.responseText.split(/\r?\n|\r/);
+  allRows.shift();
+  var points = allRows.map(function(row) {//读取解析csv数据表，获取数据点
+    var item = row.split(',');
+    var coords = row.match(/"(.*)"/)[1].split(',');
+    return {
+      coords: [parseFloat(coords[0]), parseFloat(coords[1])],
+      name: item[2],
+      city: item[0]
+    }
+  })
+  var features = points.map(function(point) {
+    return new ol.Feature({
+      geometry: new ol.geom.Point(ol.proj.fromLonLat(point.coords)) //经纬度坐标需转换为墨卡托投影坐标EPSG:3857
+    })
+  })
+  vector.getSource().addFeatures(features); //热力图层添加数据点
+}
+xhr.open('GET', 'china5a.csv', true);
+xhr.send();
+```
+效果如图：
+![热力图](/images/heat.png)
 ## 11.3 判断点是否在面内
 ## 11.4 拾取坐标
 ## 11.5 点击地图获取点击点关联的 features
