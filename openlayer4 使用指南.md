@@ -1224,6 +1224,7 @@ xhr.send();
 ```
 效果如图：
 ![热力图](/images/heat.png)
+[效果演示](https://jiafengz.github.io/openlayer4/demo/application/heat.html)
 ## 11.3 判断点是否在面内
 ## 11.4 拾取坐标
 ## 11.5 点击地图获取点击点关联的 features
