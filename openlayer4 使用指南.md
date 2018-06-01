@@ -68,7 +68,7 @@ openlayer 的结构就是由上面提到的几个关键概念为骨架组建的�
 除了以上几个核心的类，还有几个重要的工具类:   
 	`ol.style` 管理地图元素(`features`)的渲染样式    
 	`ol.proj` 封装了坐标相关的操作，比如说坐标变换   
-	`ol.events` 事件，`ol.events.Event`实现了各种事件接口，其下又有若干对应不同触发对象的事件类，比如`ol.MapEvent`就是负责`map`触发的事件，`ol.Map`中就有定义能够触发的事件类型。  
+	`ol.events` 事件，`ol.events.Event`实现了各种事件接口，其下又有若干对应不同触发对象的事件类，比如`ol.MapEvent`就定义了`map`地图对象触发的事件类型。  
 
 # 2 ol.Map
 [demo](https://jiafengz.github.io/openlayer4/demo/olMap/baseMap.html)
@@ -241,26 +241,26 @@ var vectorLayer = new ol.layer.Vector({
         })
     }));
     //使用feature构造地图数据源
-  	var source = new ol.source.Vector({
-  		features: [feature]
-  	});
+    var source = new ol.source.Vector({
+	features: [feature]
+    });
 	//利用source构造layer
-  	var vectorLayer = new ol.layer.Vector({
+    var vectorLayer = new ol.layer.Vector({
       source: source
     });
     return vectorLayer;
-  }
+}
 
-	var layers = [];
-	layers.push(createLayer('red', [40, 40])); //添加两个图层
-	layers.push(createLayer('blue', [0, 40]));
-  	var map = new ol.Map({
-	  	layers: layers,
-	    target: 'map',
-	    view: new ol.View({
-	      center: [0, 0],
-	      zoom: 18
-	    })
+var layers = [];
+layers.push(createLayer('red', [40, 40])); //添加两个图层
+layers.push(createLayer('blue', [0, 40]));
+var map = new ol.Map({
+    layers: layers,
+    target: 'map',
+    view: new ol.View({
+      center: [0, 0],
+      zoom: 18
+    })
   })
 	
   function getProperties(layer) {
@@ -310,7 +310,7 @@ ol.source.Source ──├── ol.source.Image ──────├── ol.
 											
 ```
 特别值得注意的是 `ol.source.Vector` 格式的数据源所包含组织的features数据需要通过解析器进行数据解析，openlayer通过`ol.format.Feature`的子类来解析各种格式的矢量数据，比如`EsriJSON` `GeoJSON` `TopoJSON` `MVT` `Text` `XML`等格式。  
-上面只是一个粗略的介绍，更多细节可以参考 openlayer的手册，要了解更多个关于地图数据模型的内容可参考专业的WebGIS书籍。
+上面只是一个粗略的介绍，更多细节可以参考 openlayer 的手册，要了解更多地图数据模型的内容，可参考专业的WebGIS书籍。
 
 ## 4.2 `ol.source.Source`基类上几个方法
 * getProjection() 获取投影坐标系
@@ -684,7 +684,7 @@ var interaction = new ol.interaction.DragAndDrop({
 ```
 
 * `ol.interaction.Select`   
-首先翻译一段来自官网API文档的原话来说明`ol.interaction.Select`的作用：这是为选择vector features（矢量元素）而设置的交互行为，通常而言被选择的feature具有不同的渲染样式style，因此这种选择元素的交互操作可以用来高亮特定的feature，也可以选择元素提供给其他的操作进行处理，例如修改编辑被选择的元素。有三种方式筛选要选择的元素：使用浏览器事件的 `condition`选项/ toggle add remove multi 选项/使用`filter`选项过滤函数。下面的例子（改造自[Box Selection](http://openlayers.org/en/latest/examples/box-selection.html)，我修改后的例子[olDraw](https://jiafengz.github.io/openlayer4/demo/olInteraction/olDraw.html)）就展示使用`ol.interaction.Select`结合`ol.interaction.DragBox`选择地图元素的功能：
+首先翻译一段来自官网API文档的原话来说明`ol.interaction.Select`的作用：这是为选择vector features（矢量元素）而设置的交互行为，通常而言被选择的feature具有不同的渲染样式style，因此`ol.interaction.Select`可以用来高亮特定的feature，也可以选择feature供进一步的处理，例如修改编辑被选择的元素。有三种方式筛选要选择的元素：使用浏览器事件的 `condition`选项/ 使用 toggle add remove multi 选项/使用`filter`选项过滤函数。下面的例子（改造自[Box Selection](http://openlayers.org/en/latest/examples/box-selection.html)，我修改后的例子[olDraw](https://jiafengz.github.io/openlayer4/demo/olInteraction/olDraw.html)）就展示了使用`ol.interaction.Select`结合`ol.interaction.DragBox`选择地图元素的功能：
 ```javascript
       var map = new ol.Map({
         layers: [
