@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>route</title>
+    <link rel="stylesheet" href="https://openlayers.org/en/v4.6.5/css/ol.css" type="text/css">
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
+    <script src="../js/jquery-3.2.1.min.js"></script>
+    <script src="https://openlayers.org/en/v4.6.5/build/ol.js"></script>
+    <meta charset="utf-8">
+    <style>    
+      #map:focus {
+        outline: #4A74A8 solid 0.15em;
+      }
+      #map {
+        width: calc(100% - 300px);
+        margin: 0 auto;
+        background: #eee;
+      }   
+      .tooltip {
+        position: relative;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 4px;
+        color: white;
+        padding: 4px 8px;
+        opacity: 0.7;
+        white-space: nowrap;
+      }
+      button {
+        border: solid 1px #eee;
+        background: #ddd;
+        border-radius: 2px;
+        padding: 5px;
+        cursor: pointer;
+      }
+      button:hover, button.active {
+        color: #fff;
+        background: #333;
+      }
+      .route-container {
+        position: fixed;
+        left: 20px;
+        top: 20px;
+        background: #fff;
+        padding: 5px;
+        box-shadow: 2px 2px 2px 1px #ddd;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map" class="map" tabindex="0"></div>
+    <div class="route-container">
+      <input id="startPoint" type="text" placeholder="拾取起点" disabled><button onclick="selectStartPoint()">拾取起点</button><br/>
+      <input id="endPoint" type="text" placeholder="拾取终点" disabled><button onclick="selectEndPoint()">拾取终点</button><br/>
+      <button onclick="searchRoute()">确定</button>
+      <ul>
+        
+      </ul>
+    </div>
+    <script>
+      var startPointInput = document.getElementById('startPoint');
+      var endPointInput = document.getElementById('endPoint');
+      var raster = new ol.layer.Tile({
+        source: new ol.source.OSM()
+      });
+      var map = new ol.Map({
+        layers: [raster],
+        target: 'map',
+        view: new ol.View({
+          center: ol.proj.fromLonLat([113.331, 23.143]),//[-11000000, 4600000],
+          zoom: 15
+        })
+      });
+
+      function HelpInfo(map) {
+        var helpInfoEle = document.createElement('div');
+        helpInfoEle.className = 'tooltip';
+        var overlay = new ol.Overlay({
+          element: helpInfoEle,
+          offset: [0, 20],
+          positioning: 'center-top'
+        });
+        map.addOverlay(overlay);
+
+        this.setPosition = function(coords) {
+          overlay.setPosition(coords);
+        };
+        this.setInfoText = function(text) {
+          helpInfoEle.innerHTML = text;
+        };
+        this.destroy = function() {
+          map.removeOverlay(overlay);
+        }
+      }
+
+      function selectStartPoint() {
+        var tip = new HelpInfo(map);
+        tip.setInfoText('单击选择起点');
+        var moveStart = function(evt) {
+          if (evt.dragging) {
+            return;
+          }
+          tip.setPosition(evt.coordinate);
+        };
+        map.on('pointermove', moveStart);
+        map.once('singleclick', function(evt) {
+          map.un('pointermove', moveStart);
+          tip.destroy();
+          var coords = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326');
+          startPointInput.value = coords[0].toFixed(4) + ',' + coords[1].toFixed(4);
+          startPointInput.coord = coords;
+        })     
+      }
+      function selectEndPoint() {
+        var tip = new HelpInfo(map);
+        tip.setInfoText('单击选择终点');
+        var moveEnd = function (evt) {
+          if (evt.dragging) {
+            return;
+          }
+          tip.setPosition(evt.coordinate);
+        }
+        map.on('pointermove', moveEnd);
+        map.once('singleclick', function(evt) {
+          map.un('pointermove', moveEnd);
+          tip.destroy();
+          var coords = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326');
+          endPointInput.value = coords[0].toFixed(4) + ',' + coords[1].toFixed(4);
+          endPointInput.coord = coords;
+        })     
+      }
+
+      function searchRoute() {
+        $.ajax({
+          type: 'GET',
+          url: 'http://restapi.amap.com/v3/direction/driving',
+          data: {
+            origin: startPointInput.coord[0]+','+startPointInput.coord[1],
+            destination: endPointInput.coord[0]+','+endPointInput.coord[1],
+            output: 'json',
+            key: ''
+          },
+          success: function(res) {            
+            localstorage.setItem('route', JSON.stringify(res.route));
+            var result = res.route.paths[0];
+            var points = result.steps.reduce(function(stepStore, step) {
+              return step.polyline.split(';').map(function(point) {
+                return point.split(',');
+              }).concat(stepStore)
+            }, [])
+          }
+        })
+      }
+    </script>
+  </body>
+</html>
