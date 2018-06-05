@@ -1225,6 +1225,15 @@ xhr.send();
 效果如图：
 ![热力图](/images/heat.png)
 [效果演示](https://jiafengz.github.io/openlayer4/demo/application/heat.html)
+
+## 11.3 实现一个路线查询的小应用
+* 鼠标在地图上拾取起点和终点
+* 点击查询，调用高德路线规划API获取路线数据（接口key可能会失效，可以使用你自己的高德地图开发者KEY）
+* 使用 openlayer 的JS API把路线绘制在地图上
+* 同时使用 overlay 标注导航提示
+[源代码](/demo/application/route.html)
+![效果如图](/images/route.png)
+[演示地址](https://jiafengz.github.io/openlayer4/demo/application/route.html)
 ## 11.3 判断点是否在面内
 ## 11.4 拾取坐标
 ## 11.5 点击地图获取点击点关联的 features
