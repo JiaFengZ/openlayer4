@@ -191,7 +191,7 @@
       function searchRoute() {                
         $.ajax({
           type: 'GET',
-          url: 'http://restapi.amap.com/v3/direction/driving',  //使用高德地图的路线规划API查询路线数据
+          url: 'https://restapi.amap.com/v3/direction/driving',  //使用高德地图的路线规划API查询路线数据
           data: {
             origin: startPointInput.coord[0] + ',' + startPointInput.coord[1],
             destination: endPointInput.coord[0] + ',' + endPointInput.coord[1],
