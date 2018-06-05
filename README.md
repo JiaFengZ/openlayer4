@@ -1,2 +1,2 @@
 ## LICENSE
-[MIT](LICENSE.md)
+[MIT](LICENSE)
